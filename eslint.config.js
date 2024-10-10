@@ -1,10 +1,10 @@
-import js from '@eslint/js'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
-import eslintPluginPrettier from 'eslint-plugin-prettier'
+const js = require('@eslint/js')
+const reactHooks = require('eslint-plugin-react-hooks')
+const reactRefresh = require('eslint-plugin-react-refresh')
+const tseslint = require('typescript-eslint')
+const eslintPluginPrettier = require('eslint-plugin-prettier')
 
-export default tseslint.config(
+module.exports = tseslint.config(
   { ignores: ['dist', 'vite.config.ts'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
