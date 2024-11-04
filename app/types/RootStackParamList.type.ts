@@ -5,5 +5,7 @@ export type RootStackParamList = {
   Settings: undefined
   Splash: undefined
   SignUp: undefined
+  MyOrder: undefined
+  Notifications: undefined
   ProductDetail: { category: string }
 }

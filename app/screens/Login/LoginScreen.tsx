@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react'
 import { View, Text, TextInput, TouchableOpacity, Animated, Alert } from 'react-native'
 import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types'
 import { RootStackParamList } from '~/types/RootStackParamList.type'
+import axios from 'axios'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 type LoginScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>
 }
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
-  const [email, setEmail] = useState('')
+  const [userName, setUserName] = useState('')
   const [password, setPassword] = useState('')
 
   const fadeAnim = new Animated.Value(0)
@@ -31,10 +33,21 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const handleLogin = () => {
-    if (email === 'junniehoang321@gmail.com' && password === '12345') {
-      navigation.replace('Home')
-    } else {
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post('https://deliveroowebapp.azurewebsites.net/api/auth/login', {
+        userName,
+        password
+      })
+
+      if (response.status === 200) {
+        const { accessToken, refreshToken } = response.data
+        await AsyncStorage.setItem('accessToken', accessToken)
+        await AsyncStorage.setItem('refreshToken', refreshToken)
+        navigation.replace('Home')
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
       Alert.alert('Login Failed', 'Username or password is incorrect.')
     }
   }
@@ -63,10 +76,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         <Text className='text-3xl font-bold mb-8 text-center text-blue-600'>Welcome Back</Text>
         <TextInput
           className='h-12 border border-gray-300 rounded-lg px-4 mb-4 bg-gray-50'
-          placeholder='Email'
-          value={email}
-          onChangeText={setEmail}
-          keyboardType='email-address'
+          placeholder='Username'
+          value={userName}
+          onChangeText={setUserName}
           autoCapitalize='none'
         />
         <TextInput
