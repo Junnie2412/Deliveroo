@@ -9,16 +9,48 @@ import SettingScreen from '~/screens/Setting/SettingScreen'
 import SplashScreen from '~/screens/Splash/SplashScreen'
 import SignUpScreen from '~/screens/SignUp/SignUpScreen'
 import ProductDetailScreen from '~/screens/ProductDetail/ProductDetailScreen'
+import Ionicons from 'react-native-vector-icons/Ionicons'
+import MyOrderScreen from '~/screens/MyOrder/MyOrderScreen'
+import NotificationsScreen from '~/screens/Notifications/NotificationsScreen'
 
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const TabNavigator = () => {
   return (
     <Tab.Navigator>
-      <Tab.Screen name='Home' component={HomeScreen} />
-      <Tab.Screen name='Setting' component={SettingScreen} />
+      <Tab.Screen
+        name='Home'
+        component={HomeScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => <Ionicons name='home-outline' size={size} color={color} />,
+          headerShown: false
+        }}
+      />
+      <Tab.Screen
+        name='MyOrder'
+        component={MyOrderScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => <Ionicons name='file-tray-outline' size={size} color={color} />,
+          headerShown: false
+        }}
+      />
+      <Tab.Screen
+        name='Notifications'
+        component={NotificationsScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => <Ionicons name='notifications-outline' size={size} color={color} />,
+          headerShown: false
+        }}
+      />
+      <Tab.Screen
+        name='Setting'
+        component={SettingScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => <Ionicons name='settings-outline' size={size} color={color} />,
+          headerShown: false
+        }}
+      />
     </Tab.Navigator>
   )
 }
@@ -31,7 +63,7 @@ const Navigation = () => {
         <Stack.Screen name='Login' component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name='SignUp' component={SignUpScreen} options={{ headerShown: false }} />
         <Stack.Screen name='ProductDetail' component={ProductDetailScreen} options={{ headerShown: false }} />
-        <Stack.Screen name='Home' component={HomeScreen} options={{ headerShown: false }} />
+        <Stack.Screen name='Home' component={TabNavigator} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   )
