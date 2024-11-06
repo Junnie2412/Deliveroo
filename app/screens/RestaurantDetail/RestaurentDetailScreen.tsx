@@ -105,7 +105,7 @@ export default function RestaurantDetailScreen() {
       </StyledView>
       <StyledImage
         className='h-20 w-20 rounded-lg object-cover'
-        source={{ uri: item.imageURL || 'https://via.placeholder.com/150' }}
+        source={{ uri: item.imageURL ? item.imageURL : 'https://via.placeholder.com/150' }}
       />
     </StyledTouchableOpacity>
   )
@@ -133,9 +133,14 @@ export default function RestaurantDetailScreen() {
         </StyledView>
       </StyledView>
 
-      <StyledScrollView className='mt-4 px-4'>
-        <FlatList data={products} renderItem={renderProductItem} keyExtractor={(item) => item.id.toString()} />
-      </StyledScrollView>
+      {/* <StyledScrollView className='mt-4 px-4'> */}
+        <FlatList
+          data={products}
+          renderItem={renderProductItem}
+          keyExtractor={(item) => item.id?.toString() || item.productName}  
+          contentContainerStyle={{ padding: 16 }}
+        />
+      {/* </StyledScrollView> */}
     </StyledView>
   )
 }

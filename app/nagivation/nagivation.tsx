@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import LoginScreen from '~/screens/Login/LoginScreen'
 import HomeScreen from '~/screens/Home/HomeScreen'
+import HomeTabScreen from '~/screens/HomeTab/HomeTabScreen'
 import SettingScreen from '~/screens/Setting/SettingScreen'
 import SplashScreen from '~/screens/Splash/SplashScreen'
 import SignUpScreen from '~/screens/SignUp/SignUpScreen'
@@ -23,8 +24,8 @@ const TabNavigator = () => {
   return (
     <Tab.Navigator>
       <Tab.Screen
-        name='Home'
-        component={HomeScreen}
+        name='HomeTab'
+        component={HomeTabScreen}
         options={{
           tabBarIcon: ({ color, size }) => <Ionicons name='home-outline' size={size} color={color} />,
           headerShown: false
