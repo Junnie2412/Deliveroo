@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import Icon from 'react-native-vector-icons/Ionicons'
 import axios from 'axios'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Notification } from '../types/Notification.type'
 
 const NotificationsScreen: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([])

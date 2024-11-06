@@ -3,12 +3,12 @@ import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, Ale
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { ChevronLeftIcon, MapPinIcon, StarIcon } from 'react-native-heroicons/solid'
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
-import { RootStackParamList } from '~/types/RootStackParamList.type'
-import { Store } from '~/types/Store.type'
-import axios from 'axios'
-import { Categories } from '~/types/Categories.type'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { FlatList } from 'react-native-gesture-handler'
+import { RootStackParamList } from '../types/RootStackParamList.type'
+import { Store } from '../types/Store.type'
+import axios from 'axios'
+import { Categories } from '../types/Categories.type'
 
 type CategoriesDetailScreenRouteProp = RouteProp<RootStackParamList, 'CategoriesDetail'>
 

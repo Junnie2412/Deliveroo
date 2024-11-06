@@ -11,11 +11,12 @@ import SplashScreen from '~/screens/Splash/SplashScreen'
 import SignUpScreen from '~/screens/SignUp/SignUpScreen'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import MyOrderScreen from '~/screens/MyOrder/MyOrderScreen'
-import NotificationsScreen from '~/screens/Notifications/NotificationsScreen'
 import CategoriesDetailScreen from '~/screens/CategoriesDetail/CategoriesDetailScreen'
 import SearchResultScreen from '~/screens/SearchResult/SearchResultScreen'
 import RestaurentDetailScreen from '~/screens/RestaurantDetail/RestaurentDetailScreen'
 import ProductDetailScreen from '~/screens/ProductDetail/ProductDetailScreen'
+import ChatScreen from '~/screens/Chat/ChatScreen'; 
+import NotificationsScreen from '~/screens/Notifications/NotificationsScreen'
 
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -48,6 +49,14 @@ const TabNavigator = () => {
         }}
       />
       <Tab.Screen
+        name='Chat'
+        component={ChatScreen} 
+        options={{
+          tabBarIcon: ({ color, size }) => <Ionicons name='chatbubble-outline' size={size} color={color} />,  
+          headerShown: false
+        }}
+      />
+      <Tab.Screen
         name='Setting'
         component={SettingScreen}
         options={{
@@ -68,9 +77,11 @@ const Navigation = () => {
         <Stack.Screen name='SignUp' component={SignUpScreen} options={{ headerShown: false }} />
         <Stack.Screen name='CategoriesDetail' component={CategoriesDetailScreen} options={{ headerShown: false }} />
         <Stack.Screen name='Home' component={TabNavigator} options={{ headerShown: false }} />
+        <Stack.Screen name='Chat' component={ChatScreen} options={{ headerShown: false }} />
         <Stack.Screen name='SearchResult' component={SearchResultScreen} options={{ headerShown: false }} />
         <Stack.Screen name='RestaurantDetail' component={RestaurentDetailScreen} options={{ headerShown: false }} />
         <Stack.Screen name='ProductDetail' component={ProductDetailScreen} options={{ headerShown: false }} />
+        <Stack.Screen name='Notification' component={NotificationsScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   )

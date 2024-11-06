@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { View, Text, Image, TouchableOpacity, ScrollView, Animated } from 'react-native'
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
-import { Product } from '~/types/Product.type'
 import { ArrowLeft, Minus, Plus, ShoppingCart } from 'lucide-react-native'
 import { styled } from 'nativewind'
-import { RootStackParamList } from '~/types/RootStackParamList.type'
+import { Product } from '../types/Product.type'
+import { RootStackParamList } from '../types/RootStackParamList.type'
 
 const StyledView = styled(View)
 const StyledText = styled(Text)

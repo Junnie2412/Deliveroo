@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, TextInput, TouchableOpacity, Animated, Alert } from 'react-native'
 import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types'
-import { RootStackParamList } from '~/types/RootStackParamList.type'
+import { RootStackParamList } from '../types/RootStackParamList.type'
 
 type SignUpScreenScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>

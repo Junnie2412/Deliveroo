@@ -3,9 +3,9 @@ import { View, Text, ScrollView, Image, TextInput, TouchableOpacity } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MagnifyingGlassIcon, AdjustmentsVerticalIcon } from 'react-native-heroicons/outline'
 import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types'
-import { RootStackParamList } from '~/types/RootStackParamList.type'
 import axios from 'axios'
-import { Categories } from '~/types/Categories.type'
+import { RootStackParamList } from '../types/RootStackParamList.type'
+import { Categories } from '../types/Categories.type'
 
 type HomeScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'CategoriesDetail'>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, TextInput, TouchableOpacity, Animated, Alert } from 'react-native'
 import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types'
-import { RootStackParamList } from '~/types/RootStackParamList.type'
 import axios from 'axios'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { RootStackParamList } from '../types/RootStackParamList.type'
 
 type LoginScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>

@@ -3,9 +3,11 @@ import { View, Text, ActivityIndicator, Image, TouchableOpacity, FlatList, Scrol
 import { useRoute, RouteProp, useNavigation, NavigationProp } from '@react-navigation/native'
 import { ArrowLeft, MapPin, Star } from 'lucide-react-native'
 import { styled } from 'nativewind'
-import { RootStackParamList } from '../types/RootStackParamList.type'
+import { useCart } from '../contexts/CartContext'
 import { Store } from '../types/Store.type'
 import { Product } from '../types/Product.type'
+import { RootStackParamList } from '../types/RootStackParamList.type'
+
 
 const StyledView = styled(View)
 const StyledText = styled(Text)
@@ -17,6 +19,7 @@ export default function RestaurantDetailScreen() {
   const route = useRoute<RouteProp<RootStackParamList, 'RestaurantDetail'>>()
   const navigation = useNavigation<NavigationProp<RootStackParamList, 'ProductDetail'>>()
   const { restaurantID } = route.params
+  const { cart, addToCart } = useCart()
   const [restaurant, setRestaurant] = useState<Store | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -30,11 +33,7 @@ export default function RestaurantDetailScreen() {
         const data: Store = await response.json()
         setRestaurant(data)
       } catch (error) {
-        if (error instanceof Error) {
-          setError(error.message)
-        } else {
-          setError('An unknown error occurred')
-        }
+        setError(error instanceof Error ? error.message : 'An unknown error occurred')
         console.error(error)
       } finally {
         setLoading(false)
@@ -48,11 +47,7 @@ export default function RestaurantDetailScreen() {
         const data: Product[] = await response.json()
         setProducts(data)
       } catch (error) {
-        if (error instanceof Error) {
-          setError(error.message)
-        } else {
-          setError('An unknown error occurred')
-        }
+        setError(error instanceof Error ? error.message : 'An unknown error occurred')
         console.error(error)
       }
     }
@@ -67,8 +62,36 @@ export default function RestaurantDetailScreen() {
   }, [restaurantID])
 
   const handleProductPress = (product: Product) => {
-    navigation.navigate('ProductDetail', { product: product })
+    navigation.navigate('ProductDetail', { product })
   }
+
+  const handleAddToCart = (product: Product) => {
+    addToCart({ productID: product.id, quantity: 1 })
+  }
+
+  const calculateTotal = () => {
+    console.log(cart) // Check cart structure
+    console.log(cart?.cartItems)
+
+    if (!cart) return { totalQuantity: 0, totalPrice: 0 }
+
+    const mappedItems = cart.cartItems.map((item) => {
+      const quantity = item.quantity || 0
+      const price = item.price || 0
+      return { quantity, price, total: quantity * price }
+    })
+
+    const totalQuantity = mappedItems.reduce((acc, item) => acc + item.quantity, 0)
+    const totalPrice = mappedItems.reduce((acc, item) => acc + item.total, 0)
+
+    console.log('Mapped Items:', mappedItems)
+    console.log('Total Quantity:', totalQuantity)
+    console.log('Total Price:', totalPrice)
+
+    return { totalQuantity, totalPrice }
+  }
+
+  const { totalQuantity, totalPrice } = calculateTotal()
 
   if (loading) {
     return (
@@ -95,19 +118,22 @@ export default function RestaurantDetailScreen() {
   }
 
   const renderProductItem = ({ item }: { item: Product }) => (
-    <StyledTouchableOpacity
-      className='flex-row items-center p-4 border-b border-gray-200'
-      onPress={() => handleProductPress(item)}
-    >
-      <StyledView className='flex-1 pr-4'>
-        <StyledText className='text-lg font-bold text-gray-800 mb-1'>{item.productName}</StyledText>
-        <StyledText className='text-base font-semibold text-gray-900'>${item.price.toFixed(2)}</StyledText>
-      </StyledView>
-      <StyledImage
-        className='h-20 w-20 rounded-lg object-cover'
-        source={{ uri: item.imageURL ? item.imageURL : 'https://via.placeholder.com/150' }}
-      />
-    </StyledTouchableOpacity>
+    <StyledView className='flex-row items-center p-4 border-b border-gray-200'>
+      <StyledTouchableOpacity className='flex-row items-center flex-1' onPress={() => handleProductPress(item)}>
+        <StyledView className='flex-1 pr-4'>
+          <StyledText className='text-lg font-bold text-gray-800 mb-1'>{item.productName}</StyledText>
+          <StyledText className='text-base font-semibold text-gray-900'>${item.price.toFixed(2)}</StyledText>
+        </StyledView>
+        <StyledImage
+          className='h-20 w-20 rounded-lg object-cover'
+          source={{ uri: item.imageURL || 'https://via.placeholder.com/150' }}
+        />
+      </StyledTouchableOpacity>
+
+      <StyledTouchableOpacity onPress={() => handleAddToCart(item)} className='ml-4'>
+        <StyledText className='text-green-500 font-bold text-lg'>+</StyledText>
+      </StyledTouchableOpacity>
+    </StyledView>
   )
 
   return (
@@ -133,14 +159,19 @@ export default function RestaurantDetailScreen() {
         </StyledView>
       </StyledView>
 
-      {/* <StyledScrollView className='mt-4 px-4'> */}
-        <FlatList
-          data={products}
-          renderItem={renderProductItem}
-          keyExtractor={(item) => item.id?.toString() || item.productName}  
-          contentContainerStyle={{ padding: 16 }}
-        />
-      {/* </StyledScrollView> */}
+      <StyledScrollView className='mt-4 px-4'>
+        <FlatList data={products} renderItem={renderProductItem} keyExtractor={(item) => item.id.toString()} />
+      </StyledScrollView>
+
+      {totalQuantity > 0 && (
+        <StyledView className='px-4 py-3 bg-gray-100'>
+          <StyledText className='text-lg font-bold'>Total: ${totalPrice.toFixed(2)}</StyledText>
+          <StyledText className='text-sm'>Quantity: {totalQuantity}</StyledText>
+          <StyledTouchableOpacity className='bg-green-500 py-2 px-4 rounded-lg mt-3'>
+            <StyledText className='text-white text-center'>Checkout</StyledText>
+          </StyledTouchableOpacity>
+        </StyledView>
+      )}
     </StyledView>
   )
 }

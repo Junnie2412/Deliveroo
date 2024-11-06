@@ -5,8 +5,8 @@ import * as Animatable from 'react-native-animatable';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import * as Progress from 'react-native-progress';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { RootStackParamList } from '~/types/RootStackParamList.type';
 import MapView, { Marker } from 'react-native-maps';
+import { RootStackParamList } from '../types/RootStackParamList.type';
 
 // const restaurants = [
 //   {

@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { View, Text, FlatList, ActivityIndicator, Image, TouchableOpacity, ScrollView } from 'react-native'
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native'
-import { Product } from '~/types/Product.type'
-import { Store } from '~/types/Store.type'
 import { ArrowLeft, MapPin, DollarSign, Star } from 'lucide-react-native'
 import { styled } from 'nativewind'
 import Slider from '@react-native-community/slider'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { RootStackParamList } from '~/types/RootStackParamList.type'
+import { Product } from '../types/Product.type'
+import { Store } from '../types/Store.type'
+import { RootStackParamList } from '../types/RootStackParamList.type'
 
 type SearchResultRouteParams = {
   searchQuery: string
@@ -26,7 +26,7 @@ export default function SearchResultScreen() {
   const [loading, setLoading] = useState(true)
   const [stores, setStores] = useState<Store[]>([])
   const [error, setError] = useState<string | null>(null)
-  const [priceRange, setPriceRange] = useState(500)
+  const [priceRange, setPriceRange] = useState(100)
   const [ratingFilter, setRatingFilter] = useState('0')
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
@@ -146,8 +146,8 @@ export default function SearchResultScreen() {
             </StyledView>
             <Slider
               minimumValue={0}
-              maximumValue={500}
-              step={10}
+              maximumValue={100}
+              step={5}
               value={priceRange}
               onValueChange={setPriceRange}
               minimumTrackTintColor='#00CCBB'
@@ -157,7 +157,7 @@ export default function SearchResultScreen() {
             <StyledView className='flex-row justify-between mt-1'>
               <StyledText className='text-gray-500'>$0</StyledText>
               <StyledText className='text-gray-500'>${priceRange}</StyledText>
-              <StyledText className='text-gray-500'>$500</StyledText>
+              <StyledText className='text-gray-500'>$100</StyledText>
             </StyledView>
           </StyledView>
 
