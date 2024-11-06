@@ -1,89 +1,108 @@
-import React from 'react'
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
+import React, { useState, useEffect } from 'react'
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Icon from 'react-native-vector-icons/Ionicons'
+import axios from 'axios'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Notification } from '~/types/Notification.type'
 
-interface Notification {
-  id: string
-  title: string
-  message: string
-  time: string
-  type: 'promo' | 'order' | 'info'
-  isRead: boolean
-}
+const NotificationsScreen: React.FC = () => {
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
 
-const notificationData: Notification[] = [
-  {
-    id: '1',
-    title: 'Your order is on its way!',
-    message: 'Your order from Pizza Hut is out for delivery. Track your order now.',
-    time: '2 min ago',
-    type: 'order',
-    isRead: false
-  },
-  {
-    id: '2',
-    title: '50% off your next order!',
-    message: 'Use code DELICIOUS50 for 50% off your next order. Valid for 24 hours only.',
-    time: '1 hour ago',
-    type: 'promo',
-    isRead: false
-  },
-  {
-    id: '3',
-    title: 'Rate your last order',
-    message: 'How was your Burger King order? Tap to rate and help us improve.',
-    time: '2 hours ago',
-    type: 'order',
-    isRead: true
-  },
-  {
-    id: '4',
-    title: 'New restaurants in your area!',
-    message: 'Check out the new restaurants',
-    time: '1 day ago',
-    type: 'info',
-    isRead: true
-  },
-  {
-    id: '5',
-    title: 'Weekend special: Free delivery',
-    message: 'Enjoy free delivery on all orders this weekend. No minimum spend required!',
-    time: '2 days ago',
-    type: 'promo',
-    isRead: true
-  }
-]
-
-const NotificationItem: React.FC<{ notification: Notification }> = ({ notification }) => {
-  const getIcon = (type: string) => {
-    switch (type) {
-      case 'promo':
-        return 'pricetag-outline'
-      case 'order':
-        return 'bicycle-outline'
-      case 'info':
-        return 'information-circle-outline'
-      default:
-        return 'notifications-outline'
+  const getToken = async () => {
+    try {
+      const token = await AsyncStorage.getItem('accessToken')
+      return token
+    } catch (error) {
+      console.error('Error retrieving token from AsyncStorage:', error)
+      return null
     }
   }
 
-  return (
-    <TouchableOpacity style={[styles.notificationItem, notification.isRead && styles.notificationRead]}>
-      <View style={[styles.iconContainer, styles[`${notification.type}Icon`]]}>
-        <Icon name={getIcon(notification.type)} size={24} color='#FFFFFF' />
-      </View>
-      <View style={styles.notificationContent}>
-        <Text style={styles.notificationTitle}>{notification.title}</Text>
-        <Text style={styles.notificationMessage}>{notification.message}</Text>
-        <Text style={styles.notificationTime}>{notification.time}</Text>
-      </View>
-    </TouchableOpacity>
-  )
-}
+  // Fetch notifications on component mount
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      const token = await getToken() // Retrieve the token
 
-const NotificationsScreen: React.FC = () => {
+      if (token) {
+        try {
+          const response = await axios.get('https://deliveroowebapp.azurewebsites.net/api/Notification', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          })
+          setNotifications(response.data)
+        } catch (error) {
+          console.error('Error fetching notifications:', error)
+        } finally {
+          setLoading(false)
+        }
+      } else {
+        console.error('No token found')
+        setLoading(false)
+      }
+    }
+
+    fetchNotifications()
+  }, [])
+
+  // Function to get the correct icon based on read status
+  const getIcon = (isRead: boolean) => {
+    return isRead ? 'checkmark-circle' : 'notifications-outline'
+  }
+
+  // Function to handle notification selection and update the server
+  const handleSelectNotification = async (notificationId: string) => {
+    const token = await getToken()
+
+    if (token) {
+      try {
+        // Optimistically update the UI
+        setNotifications((prevNotifications) =>
+          prevNotifications.map((notification) =>
+            notification.id === notificationId ? { ...notification, isRead: true } : notification
+          )
+        )
+        await axios.put(
+          `https://deliveroowebapp.azurewebsites.net/api/Notification/${notificationId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        )
+      } catch (error) {
+        console.error('Error updating notification:', error)
+
+        // Rollback the optimistic update in case of error
+        setNotifications((prevNotifications) =>
+          prevNotifications.map((notification) =>
+            notification.id === notificationId ? { ...notification, isRead: false } : notification
+          )
+        )
+      }
+    }
+  }
+
+  const NotificationItem: React.FC<{ notification: Notification }> = ({ notification }) => {
+    return (
+      <TouchableOpacity
+        style={[styles.notificationItem, notification.isRead && styles.notificationRead]}
+        onPress={() => handleSelectNotification(notification.id)} // Handle selection
+      >
+        <View style={[styles.iconContainer, styles[`${notification.isRead ? 'order' : 'promo'}Icon`]]}>
+          <Icon name={getIcon(notification.isRead)} size={24} color='#FFFFFF' />
+        </View>
+        <View style={styles.notificationContent}>
+          <Text style={styles.notificationMessage}>{notification.message}</Text>
+          <Text style={styles.notificationTime}>{notification.createdAt}</Text>
+        </View>
+      </TouchableOpacity>
+    )
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -93,9 +112,11 @@ const NotificationsScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
       <ScrollView style={styles.notificationList}>
-        {notificationData.map((notification) => (
-          <NotificationItem key={notification.id} notification={notification} />
-        ))}
+        {loading ? (
+          <ActivityIndicator size='large' color='#00CCBC' />
+        ) : (
+          notifications.map((notification) => <NotificationItem key={notification.id} notification={notification} />)
+        )}
       </ScrollView>
     </SafeAreaView>
   )
@@ -152,17 +173,8 @@ const styles = StyleSheet.create({
   orderIcon: {
     backgroundColor: '#00CCBC'
   },
-  infoIcon: {
-    backgroundColor: '#4169E1'
-  },
   notificationContent: {
     flex: 1
-  },
-  notificationTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333333',
-    marginBottom: 4
   },
   notificationMessage: {
     fontSize: 14,

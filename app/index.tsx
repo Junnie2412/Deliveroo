@@ -1,8 +1,31 @@
-import React from 'react'
-import Navigation from './nagivation/nagivation'
+import React, { useEffect } from 'react'
+import { useCart } from './contexts/CartContext'
+import { CartProvider } from './contexts/CartContext'
+import PushNotification from 'react-native-push-notification'
+import { Platform } from 'react-native'
+import { Navigation } from 'lucide-react-native' // Assuming you use a navigation component
 
 const App = () => {
-  return <Navigation />
+  const { cart } = useCart() // Assuming 'cart' is the number of items in the cart
+
+  useEffect(() => {
+    // Update the badge number when the cart changes
+    if (cart !== null) {
+      if (Platform.OS === 'android') {
+        // Set badge for Android devices
+        PushNotification.setApplicationIconBadgeNumber(cart)
+      } else if (Platform.OS === 'ios') {
+        // Set badge for iOS devices
+        PushNotification.setApplicationIconBadgeNumber(cart)
+      }
+    }
+  }, [cart])
+
+  return (
+    <CartProvider>
+      <Navigation />
+    </CartProvider>
+  )
 }
 
 export default App
