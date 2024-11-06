@@ -1,46 +1,15 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { View, Text, ScrollView, Image, TextInput, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MagnifyingGlassIcon, AdjustmentsVerticalIcon } from 'react-native-heroicons/outline'
 import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types'
 import { RootStackParamList } from '~/types/RootStackParamList.type'
+import axios from 'axios'
+import { Categories } from '~/types/Categories.type'
 
 type HomeScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'ProductDetail'>
+  navigation: NativeStackNavigationProp<RootStackParamList, 'CategoriesDetail'>
 }
-
-const categories = [
-  {
-    id: 1,
-    name: 'Pizza',
-    image:
-      'https://firebasestorage.googleapis.com/v0/b/deliveroo-dab94.appspot.com/o/Splash%2Fpizza.jpg?alt=media&token=ae5cf452-4184-4b20-9f39-c1a49ca5b975'
-  },
-  {
-    id: 2,
-    name: 'Burgers',
-    image:
-      'https://firebasestorage.googleapis.com/v0/b/deliveroo-dab94.appspot.com/o/Splash%2Fburger.jpg?alt=media&token=4913b4f4-b37f-44a6-9fae-48beec255483'
-  },
-  {
-    id: 3,
-    name: 'Sushi',
-    image:
-      'https://firebasestorage.googleapis.com/v0/b/deliveroo-dab94.appspot.com/o/Splash%2Fsushi.jpg?alt=media&token=c86cb412-e217-4f71-a64e-c6e17bc3d6c6'
-  },
-  {
-    id: 4,
-    name: 'Italian',
-    image:
-      'https://firebasestorage.googleapis.com/v0/b/deliveroo-dab94.appspot.com/o/Splash%2Fmiy.jpg?alt=media&token=dc0800c8-8415-4c2b-90f1-8e26756dc469'
-  },
-  {
-    id: 5,
-    name: 'Chinese',
-    image:
-      'https://firebasestorage.googleapis.com/v0/b/deliveroo-dab94.appspot.com/o/Splash%2Fchinese.jpg?alt=media&token=84155e4f-4949-4846-927a-5f0d7c08ed7b'
-  }
-]
 
 const featuredCollections = [
   { id: 1, title: 'Offers near you!', description: 'Why not support your local restaurant tonight!' },
@@ -75,6 +44,25 @@ const restaurants = [
 ]
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
+  const [categories, setCategories] = useState<Categories[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const handleSearchNavigation = () => {
+    navigation.navigate('SearchResult', { searchQuery })
+  }
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('https://deliveroowebapp.azurewebsites.net/api/categories')
+        setCategories(response.data)
+      } catch (error) {
+        console.error('Error fetching categories:', error)
+      }
+    }
+    fetchCategories()
+  }, [])
+
   return (
     <SafeAreaView className='flex-1 bg-gray-100'>
       <ScrollView className='flex-1'>
@@ -102,9 +90,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         <View className='flex-row items-center space-x-2 pb-2 px-4'>
           <View className='flex-row flex-1 space-x-2 bg-gray-200 p-3 rounded-full'>
             <MagnifyingGlassIcon color='gray' size={20} />
-            <TextInput placeholder='Restaurants and cuisines' keyboardType='default' className='flex-1' />
+            <TextInput
+              placeholder='Restaurants and cuisines'
+              keyboardType='default'
+              className='flex-1'
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleSearchNavigation}>
             <AdjustmentsVerticalIcon color='#00CCBB' size={24} />
           </TouchableOpacity>
         </View>
@@ -121,10 +115,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <TouchableOpacity
               key={category.id}
               className='relative mr-2'
-              onPress={() => navigation.navigate('ProductDetail', { category: category.name })}
+              onPress={() => navigation.navigate('CategoriesDetail', { categoryID: category.id })}
             >
-              <Image source={{ uri: category.image }} className='h-20 w-20 rounded' />
-              <Text className='absolute bottom-1 left-1 text-white font-bold'>{category.name}</Text>
+              <Image source={{ uri: category.imageUrl }} className='h-20 w-20 rounded' />
+              <Text className='absolute bottom-1 left-1 text-white font-bold'>{category.categoryName}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>

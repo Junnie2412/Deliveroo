@@ -1,3 +1,5 @@
+import { Product } from './Product.type'
+
 export type RootStackParamList = {
   Login: undefined
   Home: undefined
@@ -7,5 +9,8 @@ export type RootStackParamList = {
   SignUp: undefined
   MyOrder: undefined
   Notifications: undefined
-  ProductDetail: { category: string }
+  SearchResult: { searchQuery: string }
+  RestaurantDetail: { restaurantID: string }
+  ProductDetail: { product: Product }
+  CategoriesDetail: { categoryID: string }
 }
