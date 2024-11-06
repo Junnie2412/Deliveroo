@@ -1,96 +1,96 @@
-import React from 'react'
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react'
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Icon from 'react-native-vector-icons/Ionicons'
+import { Orders } from '../types/Orders.type';
 
-interface OrderItem {
-  id: string
-  restaurantName: string
-  date: string
-  items: string[]
-  total: string
-  status: 'Delivered' | 'In Progress' | 'Cancelled'
-}
 
-const orderData: OrderItem[] = [
-  {
-    id: '1',
-    restaurantName: 'Burger King',
-    date: '15 May, 2:30 PM',
-    items: ['Whopper', 'French Fries', 'Coca Cola'],
-    total: '$15.99',
-    status: 'Delivered'
-  },
-  {
-    id: '2',
-    restaurantName: 'Pizza Hut',
-    date: '14 May, 7:45 PM',
-    items: ['Pepperoni Pizza', 'Garlic Bread'],
-    total: '$22.50',
-    status: 'Delivered'
-  },
-  {
-    id: '3',
-    restaurantName: 'Subway',
-    date: '13 May, 12:15 PM',
-    items: ['Italian BMT', 'Chocolate Chip Cookie'],
-    total: '$11.25',
-    status: 'Cancelled'
-  },
-  {
-    id: '4',
-    restaurantName: "McDonald's",
-    date: '12 May, 6:20 PM',
-    items: ['Big Mac', 'Chicken McNuggets', 'Fries'],
-    total: '$18.75',
-    status: 'In Progress'
-  }
-]
-
-const OrderCard: React.FC<{ order: OrderItem }> = ({ order }) => (
+const OrderCard: React.FC<{ order: Orders }> = ({ order }) => (
   <TouchableOpacity style={styles.orderCard}>
     <View style={styles.orderHeader}>
       <Image source={{ uri: 'https://via.placeholder.com/60' }} style={styles.restaurantImage} />
       <View style={styles.orderInfo}>
-        <Text style={styles.restaurantName}>{order.restaurantName}</Text>
-        <Text style={styles.orderDate}>{order.date}</Text>
-        <Text style={styles.orderItems}>{order.items.join(', ')}</Text>
+        <Text style={styles.orderDate}>{new Date(order.orderDate).toLocaleDateString()}</Text>
+        <Text style={styles.orderItems}>
+          {order.cart.cartItems.map((item) => item.productName).join(', ')}
+        </Text>
       </View>
     </View>
     <View style={styles.orderFooter}>
-      <Text style={styles.orderTotal}>{order.total}</Text>
-      <Text
-        style={[
-          styles.orderStatus,
-          order.status === 'Delivered' && styles.statusDelivered,
-          order.status === 'In Progress' && styles.statusInProgress,
-          order.status === 'Cancelled' && styles.statusCancelled
-        ]}
-      >
-        {order.status}
+      <Text style={styles.orderTotal}>${order.cart.totalPrice}</Text>
+      <Text style={[styles.orderStatus, order.orderStatus === 'Delivered' && styles.statusDelivered]}>
+        {order.orderStatus}
       </Text>
     </View>
   </TouchableOpacity>
-)
+);
 
 const MyOrderScreen: React.FC = () => {
+  const [orders, setOrders] = useState<Orders[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const getAccessToken = async () => {
+    try{
+      const accessToken = await AsyncStorage.getItem('accessToken')
+      return accessToken 
+    }catch(error){
+      console.error("Error getting accessToken: ", error)
+      return null
+    }
+  }
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      setLoading(true);
+      try {
+        const token =  await getAccessToken()
+        if(!token){
+          throw new Error('Access Token not found!')
+        }
+        const response = await axios.get<Orders[]>('https://deliveroowebapp.azurewebsites.net/api/Orders', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        setOrders(response.data);
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+        Alert.alert('Error', 'Could not fetch orders.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []); // Empty dependency array ensures this effect only runs once when the component mounts.
+
+  if (loading) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (orders.length === 0) {
+    return <Text>No orders available</Text>;
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Orders</Text>
       </View>
       <ScrollView style={styles.ordersContainer}>
-        {orderData.map((order) => (
+        {orders.map((order) => (
           <OrderCard key={order.id} order={order} />
         ))}
       </ScrollView>
       <TouchableOpacity style={styles.helpButton}>
-        <Icon name='help-circle-outline' size={24} color='#00CCBC' />
+        <Icon name="help-circle-outline" size={24} color="#00CCBC" />
         <Text style={styles.helpButtonText}>Need help with your order?</Text>
       </TouchableOpacity>
     </SafeAreaView>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
