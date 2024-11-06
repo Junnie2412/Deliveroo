@@ -8,6 +8,7 @@ import { Store } from '~/types/Store.type'
 import axios from 'axios'
 import { Categories } from '~/types/Categories.type'
 import { StackNavigationProp } from '@react-navigation/stack'
+import { FlatList } from 'react-native-gesture-handler'
 
 type CategoriesDetailScreenRouteProp = RouteProp<RootStackParamList, 'CategoriesDetail'>
 
@@ -28,8 +29,13 @@ export default function CategoriesDetailScreen() {
           `https://deliveroowebapp.azurewebsites.net/api/products?CategoryId=${categoryID}`
         )
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const stores = response.data.map((product: any) => product.store)
-        setRestaurants(stores)
+        if (response.data && Array.isArray(response.data)) {
+          const stores = response.data.map((product: any) => product.store);  
+          setRestaurants(stores);
+        } else {
+          console.error('Invalid data structure returned:', response.data);
+          Alert.alert('Error', 'Invalid data structure from server');
+        }
       } catch (error) {
         console.error('Error fetching products:', error)
         Alert.alert('Error', 'Could not fetch products.')
@@ -61,6 +67,23 @@ export default function CategoriesDetailScreen() {
   const handleRestaurantPress = (restaurantID: string) => {
     navigation.navigate('RestaurantDetail', { restaurantID })
   }
+
+  const renderRestaurant = ({ item, index }: { item: Store, index: number }) => (
+    <TouchableOpacity
+      key={`${item.id}-${index}`}
+      className='bg-white mb-4 shadow-sm'
+      onPress={() => handleRestaurantPress(item.id)}
+    >
+      <Image source={{ uri: item.imageUrl }} className='h-36 w-full bg-gray-300 p-4' />
+      <View className='px-3 pb-4 space-y-2'>
+        <Text className='text-lg font-bold pt-2'>{item.storeName}</Text>
+        <View className='flex-row items-center space-x-1'>
+          <MapPinIcon color='gray' opacity={0.4} size={22} />
+          <Text className='text-xs text-gray-500'>{item.address}</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView className='flex-1 bg-white'>
@@ -94,13 +117,20 @@ export default function CategoriesDetailScreen() {
           <Text className='mt-2 text-gray-500'>Loading restaurants...</Text>
         </View>
       ) : (
+        // <FlatList
+        //   data={restaurants}
+        //   renderItem={renderRestaurant}
+        //   keyExtractor={(item) => item.id}
+        //   className='bg-gray-100'
+        // />
+
         <ScrollView className='bg-gray-100'>
           <Text className='px-4 pt-6 mb-3 font-bold text-xl'>Featured Restaurants</Text>
-          {restaurants.map((restaurant) => (
+          {restaurants.map((restaurant, index) => (
             <TouchableOpacity
-              key={restaurant.id}
+              key={`${restaurant.id}-${index}`}  
               className='bg-white mb-4 shadow-sm'
-              onPress={() => handleRestaurantPress(restaurant.id)} // Pass restaurant ID on click
+              onPress={() => handleRestaurantPress(restaurant.id)} 
             >
               <Image source={{ uri: restaurant.imageUrl }} className='h-36 w-full bg-gray-300 p-4' />
               <View className='px-3 pb-4 space-y-2'>

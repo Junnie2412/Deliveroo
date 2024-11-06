@@ -3,6 +3,7 @@ import { Product } from './Product.type'
 export type RootStackParamList = {
   Login: undefined
   Home: undefined
+  HomeTab: undefined
   Profile: { id: string }
   Settings: undefined
   Splash: undefined
