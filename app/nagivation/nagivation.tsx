@@ -8,10 +8,13 @@ import HomeScreen from '~/screens/Home/HomeScreen'
 import SettingScreen from '~/screens/Setting/SettingScreen'
 import SplashScreen from '~/screens/Splash/SplashScreen'
 import SignUpScreen from '~/screens/SignUp/SignUpScreen'
-import ProductDetailScreen from '~/screens/ProductDetail/ProductDetailScreen'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import MyOrderScreen from '~/screens/MyOrder/MyOrderScreen'
 import NotificationsScreen from '~/screens/Notifications/NotificationsScreen'
+import CategoriesDetailScreen from '~/screens/CategoriesDetail/CategoriesDetailScreen'
+import SearchResultScreen from '~/screens/SearchResult/SearchResultScreen'
+import RestaurentDetailScreen from '~/screens/RestaurantDetail/RestaurentDetailScreen'
+import ProductDetailScreen from '~/screens/ProductDetail/ProductDetailScreen'
 
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -62,8 +65,11 @@ const Navigation = () => {
         <Stack.Screen name='Splash' component={SplashScreen} options={{ headerShown: false }} />
         <Stack.Screen name='Login' component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name='SignUp' component={SignUpScreen} options={{ headerShown: false }} />
-        <Stack.Screen name='ProductDetail' component={ProductDetailScreen} options={{ headerShown: false }} />
+        <Stack.Screen name='CategoriesDetail' component={CategoriesDetailScreen} options={{ headerShown: false }} />
         <Stack.Screen name='Home' component={TabNavigator} options={{ headerShown: false }} />
+        <Stack.Screen name='SearchResult' component={SearchResultScreen} options={{ headerShown: false }} />
+        <Stack.Screen name='RestaurantDetail' component={RestaurentDetailScreen} options={{ headerShown: false }} />
+        <Stack.Screen name='ProductDetail' component={ProductDetailScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   )

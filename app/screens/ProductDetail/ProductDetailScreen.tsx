@@ -1,119 +1,121 @@
-import React from 'react'
-import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { ChevronLeftIcon, MapPinIcon, StarIcon } from 'react-native-heroicons/solid'
-import { useNavigation } from '@react-navigation/native'
+import React, { useState } from 'react'
+import { View, Text, Image, TouchableOpacity, ScrollView, Animated } from 'react-native'
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
+import { Product } from '~/types/Product.type'
+import { ArrowLeft, Minus, Plus, ShoppingCart } from 'lucide-react-native'
+import { styled } from 'nativewind'
+import { RootStackParamList } from '~/types/RootStackParamList.type'
 
-const restaurants = [
-  {
-    id: 1,
-    name: "Joe's Pizza",
-    image:
-      'https://firebasestorage.googleapis.com/v0/b/deliveroo-dab94.appspot.com/o/Splash%2FjoePizza.jpg?alt=media&token=29762181-9dde-4068-b794-fee1957bde0e',
-    rating: 4.5,
-    reviews: 500,
-    category: 'Italian',
-    address: '123 Main St, New York, NY',
-    deliveryTime: '20-30 min',
-    deliveryFee: '$2.99'
-  },
-  {
-    id: 2,
-    name: "Mama's Pizzeria",
-    image:
-      'https://firebasestorage.googleapis.com/v0/b/deliveroo-dab94.appspot.com/o/Splash%2Fmamapizza.jfif?alt=media&token=a2c32468-838e-41cd-85a5-c76af3ddf8d6',
-    rating: 4.2,
-    reviews: 350,
-    category: 'Italian',
-    address: '456 Elm St, New York, NY',
-    deliveryTime: '25-35 min',
-    deliveryFee: '$3.99'
-  },
-  {
-    id: 3,
-    name: "Luigi's Pizza Palace",
-    image:
-      'https://firebasestorage.googleapis.com/v0/b/deliveroo-dab94.appspot.com/o/Splash%2Fluispizza.jfif?alt=media&token=58ecf037-17d2-41f7-a5ea-8c88097fd310',
-    rating: 4.7,
-    reviews: 750,
-    category: 'Italian',
-    address: '789 Oak St, New York, NY',
-    deliveryTime: '15-25 min',
-    deliveryFee: '$1.99'
-  }
-]
+const StyledView = styled(View)
+const StyledText = styled(Text)
+const StyledImage = styled(Image)
+const StyledTouchableOpacity = styled(TouchableOpacity)
+const StyledScrollView = styled(ScrollView)
 
-export default function ProductDetailScreen() {
+const ProductDetailScreen = () => {
+  const route = useRoute<RouteProp<RootStackParamList, 'ProductDetail'>>()
   const navigation = useNavigation()
+  const { product }: { product: Product } = route.params
+
+  const [quantity, setQuantity] = useState(1)
+  const [showAddToCart, setShowAddToCart] = useState(false)
+  const fadeAnim = useState(new Animated.Value(0))[0]
+
+  const decreaseQuantity = () => {
+    if (quantity > 1) {
+      setQuantity(quantity - 1)
+    }
+  }
+
+  const increaseQuantity = () => {
+    setQuantity(quantity + 1)
+    if (!showAddToCart) {
+      setShowAddToCart(true)
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true
+      }).start()
+    }
+  }
+
+  const addToCart = () => {
+    console.log('Added to cart', { product, quantity })
+    // Handle adding to cart logic here
+  }
+
+  const handleReturn = () => {
+    navigation.goBack()
+  }
+
   return (
-    <SafeAreaView className='flex-1 bg-white'>
-      <View className='relative'>
-        <Image
-          source={{
-            uri: 'https://firebasestorage.googleapis.com/v0/b/deliveroo-dab94.appspot.com/o/Splash%2Fpizzarestaurant.jpg?alt=media&token=fce3d031-9e4e-41fc-ade1-da77774e032a'
-          }}
-          className='w-full h-56 bg-gray-300 p-4'
-        />
-        <TouchableOpacity
-          className='absolute top-3 left-5 p-2 bg-gray-100 rounded-full'
-          onPress={() => navigation.goBack()}
-        >
-          <ChevronLeftIcon size={25} color='#00CCBB' />
-        </TouchableOpacity>
-      </View>
+    <StyledView className='flex-1 bg-white'>
+      <StyledScrollView>
+        <StyledView className='relative'>
+          <StyledImage source={{ uri: product.imageURL }} className='w-full h-72' />
+          <StyledTouchableOpacity
+            className='absolute top-12 left-4 bg-white p-2 rounded-full shadow-md'
+            onPress={handleReturn}
+          >
+            <ArrowLeft color='#00CCBB' size={24} />
+          </StyledTouchableOpacity>
+        </StyledView>
 
-      <View className='bg-white'>
-        <View className='px-4 pt-4'>
-          <Text className='text-3xl font-bold'>Pizza Restaurants</Text>
-          <View className='flex-row space-x-2 my-1'>
-            <View className='flex-row items-center space-x-1'>
-              <StarIcon color='green' opacity={0.5} size={22} />
-              <Text className='text-xs text-gray-500'>
-                <Text className='text-green-500'>4.5</Text> · Offers
-              </Text>
-            </View>
-            <View className='flex-row items-center space-x-1'>
-              <MapPinIcon color='gray' opacity={0.4} size={22} />
-              <Text className='text-xs text-gray-500'>Nearby · New York</Text>
-            </View>
-          </View>
-          <Text className='text-gray-500 mt-2 pb-4'>
-            Delicious pizza options from top-rated restaurants in your area
-          </Text>
-        </View>
-      </View>
+        <StyledView className='bg-white -mt-12 rounded-t-3xl pt-6 px-5'>
+          <StyledText className='text-3xl font-bold text-gray-800 mb-2'>{product.productName}</StyledText>
+          <StyledText className='text-2xl font-semibold text-gray-900 mb-6'>${product.price.toFixed(2)}</StyledText>
 
-      <ScrollView className='bg-gray-100'>
-        <Text className='px-4 pt-6 mb-3 font-bold text-xl'>Featured Restaurants</Text>
-        {restaurants.map((restaurant) => (
-          <TouchableOpacity key={restaurant.id} className='bg-white mb-4 shadow-sm'>
-            <Image source={{ uri: restaurant.image }} className='h-36 w-full bg-gray-300 p-4' />
-            <View className='px-3 pb-4 space-y-2'>
-              <Text className='text-lg font-bold pt-2'>{restaurant.name}</Text>
-              <View className='flex-row items-center space-x-1'>
-                <StarIcon color='green' opacity={0.5} size={22} />
-                <Text className='text-xs text-gray-500'>
-                  <Text className='text-green-500'>{restaurant.rating}</Text> · {restaurant.reviews} reviews
-                </Text>
-              </View>
-              <View className='flex-row items-center space-x-1'>
-                <MapPinIcon color='gray' opacity={0.4} size={22} />
-                <Text className='text-xs text-gray-500'>{restaurant.address}</Text>
-              </View>
-            </View>
-            <View className='flex-row items-center space-x-2 px-3 pb-4'>
-              <View className='flex-row items-center space-x-1'>
-                <Image source={{ uri: '/placeholder.svg?height=20&width=20' }} className='h-4 w-4' />
-                <Text className='text-xs text-gray-500'>{restaurant.deliveryTime}</Text>
-              </View>
-              <View className='flex-row items-center space-x-1'>
-                <Image source={{ uri: '/placeholder.svg?height=20&width=20' }} className='h-4 w-4' />
-                <Text className='text-xs text-gray-500'>{restaurant.deliveryFee} delivery fee</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-    </SafeAreaView>
+          <StyledView className='flex-row items-center justify-between mb-6'>
+            <StyledView className='flex-row items-center bg-gray-100 rounded-full'>
+              <StyledTouchableOpacity onPress={decreaseQuantity} className='p-3'>
+                <Minus color={quantity > 1 ? '#00CCBB' : '#A0AEC0'} size={24} />
+              </StyledTouchableOpacity>
+              <StyledText className='mx-4 text-xl font-bold'>{quantity}</StyledText>
+              <StyledTouchableOpacity onPress={increaseQuantity} className='p-3'>
+                <Plus color='#00CCBB' size={24} />
+              </StyledTouchableOpacity>
+            </StyledView>
+          </StyledView>
+
+          <StyledView className='mb-6'>
+            <StyledText className='text-lg font-semibold text-gray-800 mb-2'>About this product</StyledText>
+          </StyledView>
+
+          <StyledView className='mb-6'>
+            <StyledText className='text-lg font-semibold text-gray-800 mb-2'>Allergens</StyledText>
+          </StyledView>
+        </StyledView>
+      </StyledScrollView>
+
+      <Animated.View
+        style={{
+          opacity: fadeAnim,
+          transform: [
+            {
+              translateY: fadeAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [50, 0]
+              })
+            }
+          ]
+        }}
+      >
+        {showAddToCart && (
+          <StyledTouchableOpacity
+            className='bg-[#00CCBB] mx-5 p-4 rounded-lg flex-row items-center justify-between mb-5'
+            onPress={addToCart}
+          >
+            <StyledText className='text-white font-bold text-lg'>{quantity}</StyledText>
+            <StyledView className='flex-row items-center'>
+              <StyledText className='text-white font-bold text-lg mr-2'>Add to cart</StyledText>
+              <ShoppingCart color='white' size={24} />
+            </StyledView>
+            <StyledText className='text-white font-bold text-lg'>${(product.price * quantity).toFixed(2)}</StyledText>
+          </StyledTouchableOpacity>
+        )}
+      </Animated.View>
+    </StyledView>
   )
 }
+
+export default ProductDetailScreen
