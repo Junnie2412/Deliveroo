@@ -6,6 +6,9 @@ import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/n
 import axios from 'axios'
 import { RootStackParamList } from '../types/RootStackParamList.type'
 import { Categories } from '../types/Categories.type'
+import { useNavigation } from '@react-navigation/native'
+import { Store } from '../types/Store.type'
+import { StarIcon } from 'react-native-heroicons/solid'
 
 type HomeScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'CategoriesDetail'>
@@ -16,36 +19,39 @@ const featuredCollections = [
   { id: 2, title: 'Best Rated', description: 'Top-rated restaurants in your area' }
 ]
 
-const restaurants = [
-  {
-    id: 1,
-    name: "Nando's",
-    image:
-      'https://firebasestorage.googleapis.com/v0/b/deliveroo-dab94.appspot.com/o/Splash%2Fnando.jpg?alt=media&token=aa4410f4-081a-4ef8-acd9-8814008d644d',
-    rating: 4.5,
-    category: 'Chicken'
-  },
-  {
-    id: 2,
-    name: 'Pizza Hut',
-    image:
-      'https://firebasestorage.googleapis.com/v0/b/deliveroo-dab94.appspot.com/o/Splash%2Fpizzahut.png?alt=media&token=05e0a041-3bd2-4cb5-afbc-1398ba5b0c40',
-    rating: 4.0,
-    category: 'Pizza'
-  },
-  {
-    id: 3,
-    name: 'Burger King',
-    image:
-      'https://firebasestorage.googleapis.com/v0/b/deliveroo-dab94.appspot.com/o/Splash%2Fburderking.jpg?alt=media&token=3bb16a13-9a3d-432a-9c78-daf15af0443a',
-    rating: 3.8,
-    category: 'Burgers'
-  }
-]
+// const restaurants = [
+//   {
+//     id: 1,
+//     name: "Nando's",
+//     image:
+//       'https://firebasestorage.googleapis.com/v0/b/deliveroo-dab94.appspot.com/o/Splash%2Fnando.jpg?alt=media&token=aa4410f4-081a-4ef8-acd9-8814008d644d',
+//     rating: 4.5,
+//     category: 'Chicken'
+//   },
+//   {
+//     id: 2,
+//     name: 'Pizza Hut',
+//     image:
+//       'https://firebasestorage.googleapis.com/v0/b/deliveroo-dab94.appspot.com/o/Splash%2Fpizzahut.png?alt=media&token=05e0a041-3bd2-4cb5-afbc-1398ba5b0c40',
+//     rating: 4.0,
+//     category: 'Pizza'
+//   },
+//   {
+//     id: 3,
+//     name: 'Burger King',
+//     image:
+//       'https://firebasestorage.googleapis.com/v0/b/deliveroo-dab94.appspot.com/o/Splash%2Fburderking.jpg?alt=media&token=3bb16a13-9a3d-432a-9c78-daf15af0443a',
+//     rating: 3.8,
+//     category: 'Burgers'
+//   }
+// ]
 
 const HomeTabScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [categories, setCategories] = useState<Categories[]>([])
+  const [stores, setStores] = useState<Store[]>([])
   const [searchQuery, setSearchQuery] = useState('')
+
+  const nav = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
   const handleSearchNavigation = () => {
     navigation.navigate('SearchResult', { searchQuery })
@@ -61,6 +67,18 @@ const HomeTabScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       }
     }
     fetchCategories()
+  }, [])
+
+  useEffect(() => {
+    const fetchStores = async () => {
+      try {
+        const response = await axios.get('https://deliveroowebapp.azurewebsites.net/api/Store')
+        setStores(response.data)  
+      } catch (error) {
+        console.error('Error fetching stores:', error)
+      }
+    }
+    fetchStores()
   }, [])
 
   return (
@@ -140,7 +158,7 @@ const HomeTabScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 paddingTop: 10
               }}
             >
-              {restaurants.map((restaurant) => (
+              {/* {restaurants.map((restaurant) => (
                 <TouchableOpacity key={restaurant.id} className='mr-4 bg-white rounded-lg shadow'>
                   <Image source={{ uri: restaurant.image }} className='h-36 w-64 rounded-t-lg' />
                   <View className='px-3 pb-4 space-y-2'>
@@ -149,6 +167,24 @@ const HomeTabScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                       <Image source={{ uri: '/placeholder.svg?height=20&width=20' }} className='h-4 w-4' />
                       <Text className='text-xs text-gray-500'>
                         <Text className='text-green-500'>{restaurant.rating}</Text> · {restaurant.category}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity> */}
+                {stores.map((store) => (
+                <TouchableOpacity
+                key={store.id}
+                className='mr-4 bg-white rounded-lg shadow'
+                onPress={() => nav.navigate('RestaurantDetail', { restaurantID: store.id })} 
+              >
+                  <Image source={{ uri: store.imageUrl }} className='h-36 w-64 rounded-t-lg' />
+                  <View className='px-3 pb-4 space-y-2'>
+                    <Text className='text-lg font-bold pt-2'>{store.storeName}</Text>
+                    <View className='flex-row items-center space-x-1'>
+                      <Image source={{ uri: '/placeholder.svg?height=20&width=20' }} className='h-4 w-4' />
+                      <StarIcon size={16} color="gold" />
+                      <Text className='text-xs text-gray-500'>
+                        <Text className='text-green-500'>{store.rating}</Text>
                       </Text>
                     </View>
                   </View>

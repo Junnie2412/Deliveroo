@@ -16,6 +16,7 @@ import RestaurentDetailScreen from '~/screens/RestaurantDetail/RestaurentDetailS
 import ProductDetailScreen from '~/screens/ProductDetail/ProductDetailScreen'
 import ChatScreen from '~/screens/Chat/ChatScreen'
 import NotificationsScreen from '~/screens/Notifications/NotificationsScreen'
+import RestaurantDetailScreen from '~/screens/RestaurantDetail/RestaurentDetailScreen'
 import CheckoutScreen from '~/screens/Checkout/CheckoutScreen'
 import PersonalDetailScreen from '~/screens/PersonalDetail/PersonalDetailScreen'
 import EditPersonalDetailScreen from '~/screens/PersonalDetail/EditPersonalDetailScreen'
@@ -82,7 +83,7 @@ const Navigation = () => {
         <Stack.Screen name='Home' component={TabNavigator} options={{ headerShown: false }} />
         <Stack.Screen name='Chat' component={ChatScreen} options={{ headerShown: false }} />
         <Stack.Screen name='SearchResult' component={SearchResultScreen} options={{ headerShown: false }} />
-        <Stack.Screen name='RestaurantDetail' component={RestaurentDetailScreen} options={{ headerShown: false }} />
+        <Stack.Screen name='RestaurantDetail' component={RestaurantDetailScreen} options={{ headerShown: false }} />
         <Stack.Screen name='ProductDetail' component={ProductDetailScreen} options={{ headerShown: false }} />
         <Stack.Screen name='Notification' component={NotificationsScreen} options={{ headerShown: false }} />
         <Stack.Screen name='Checkout' component={CheckoutScreen} options={{ headerShown: false }} />

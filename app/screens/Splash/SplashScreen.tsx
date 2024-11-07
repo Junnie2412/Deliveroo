@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react'
 import { View, StyleSheet, Image, StatusBar } from 'react-native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { RootStackParamList } from '~/types/RootStackParamList.type'
+import { RootStackParamList } from '../types/RootStackParamList.type'
 
 type SplashScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Splash'>

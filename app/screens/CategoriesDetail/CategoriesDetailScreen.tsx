@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { ChevronLeftIcon, MapPinIcon, StarIcon } from 'react-native-heroicons/solid'
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { FlatList } from 'react-native-gesture-handler'
 import { RootStackParamList } from '../types/RootStackParamList.type'
 import { Store } from '../types/Store.type'
 import axios from 'axios'
@@ -30,8 +29,13 @@ export default function CategoriesDetailScreen() {
         )
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (response.data && Array.isArray(response.data)) {
-          const stores = response.data.map((product: any) => product.store);  
-          setRestaurants(stores);
+          // Lọc dữ liệu trùng lặp
+          const stores = response.data.map((product: any) => product.store)
+          
+          // Sử dụng Set để loại bỏ các cửa hàng trùng lặp theo ID
+          const uniqueStores = Array.from(new Map(stores.map(store => [store.id, store])).values())
+          
+          setRestaurants(uniqueStores);
         } else {
           console.error('Invalid data structure returned:', response.data);
           Alert.alert('Error', 'Invalid data structure from server');
@@ -117,13 +121,6 @@ export default function CategoriesDetailScreen() {
           <Text className='mt-2 text-gray-500'>Loading restaurants...</Text>
         </View>
       ) : (
-        // <FlatList
-        //   data={restaurants}
-        //   renderItem={renderRestaurant}
-        //   keyExtractor={(item) => item.id}
-        //   className='bg-gray-100'
-        // />
-
         <ScrollView className='bg-gray-100'>
           <Text className='px-4 pt-6 mb-3 font-bold text-xl'>Featured Restaurants</Text>
           {restaurants.map((restaurant, index) => (
