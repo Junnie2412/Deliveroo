@@ -1,72 +1,77 @@
-import { useEffect, useState } from 'react';
-import firestore from '@react-native-firebase/firestore';
-import AsyncStorage from '@react-native-async-storage/async-storage'; 
+// ChatScreen.js
+import React, { useState } from "react";
+import { View, Text, TextInput, Button, FlatList, StyleSheet } from "react-native";
+import { ChatHub } from "./ChatHub";
 
+// Define types for the message
 interface Message {
-    userId: string;
-    message: string;
-    sentAt: any; 
+  userId: string;
+  message: string;
+  sentAt: string;
 }
 
 const ChatScreen = () => {
-    const [messages, setMessages] = useState<Message[]>([]); 
-    const [newMessage, setNewMessage] = useState('');
-    const [userToken, setUserToken] = useState<string | null>(null); 
+  const [message, setMessage] = useState<string>(""); 
+  const [messages, setMessages] = useState<Message[]>([]); 
+  const [userId, setUserId] = useState<string>("user1");
 
-    const getToken = async () => {
-        try {
-            const token = await AsyncStorage.getItem('accessToken'); 
-            setUserToken(token); 
-        } catch (error) {
-            console.error('Error retrieving token from AsyncStorage:', error);
-        }
-    };
+  const { sendMessage } = ChatHub({
+    onMessageReceived: (userId: string, message: string, sentAt: string) => {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { userId, message, sentAt }
+      ]);
+    }
+  });
 
-    useEffect(() => {
-        getToken(); 
+  const handleSendMessage = () => {
+    sendMessage(userId, message);
+    setMessage(""); 
+  };
 
-        const unsubscribe = firestore()
-            .collection('messages')
-            .orderBy('sentAt')
-            .onSnapshot(snapshot => {
-                const newMessages: Message[] = snapshot.docs.map(doc => doc.data() as Message); // Type the data as Message
-                setMessages(newMessages); // Set the messages state with the correct type
-            });
-
-        return () => unsubscribe();
-    }, []);
-
-    const sendMessage = async () => {
-        if (userToken) {
-            firestore().collection('messages').add({
-                userId: userToken,  
-                message: newMessage,
-                sentAt: firestore.FieldValue.serverTimestamp()
-            });
-            setNewMessage(''); 
-        } else {
-            console.error('No user token found');
-        }
-    };
-
-    return (
-        <div>
-            <div>
-                <h2>Chat</h2>
-                <ul>
-                    {messages.map((msg, idx) => (
-                        <li key={idx}>{msg.message}</li>
-                    ))}
-                </ul>
-            </div>
-            <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-            />
-            <button onClick={sendMessage}>Send</button>
-        </div>
-    );
+  return (
+    <View style={styles.container}>
+      <FlatList
+        data={messages}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.messageContainer}>
+            <Text>{item.userId}: {item.message}</Text>
+            <Text style={styles.timestamp}>{item.sentAt}</Text>
+          </View>
+        )}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Enter message"
+        value={message}
+        onChangeText={setMessage}
+      />
+      <Button title="Send" onPress={handleSendMessage} />
+    </View>
+  );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  messageContainer: {
+    padding: 10,
+    borderBottomWidth: 1,
+  },
+  timestamp: {
+    fontSize: 12,
+    color: "gray",
+  },
+  input: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+});
 
 export default ChatScreen;

@@ -6,7 +6,6 @@ import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/n
 import axios from 'axios'
 import { RootStackParamList } from '../types/RootStackParamList.type'
 import { Categories } from '../types/Categories.type'
-import { Store } from '../types/Store.type'
 
 type HomeScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'CategoriesDetail'>
@@ -46,7 +45,6 @@ const restaurants = [
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [categories, setCategories] = useState<Categories[]>([])
-  const [stores, setStores] = useState<Store[]>([])
   const [searchQuery, setSearchQuery] = useState('')
 
   const handleSearchNavigation = () => {
@@ -63,18 +61,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       }
     }
     fetchCategories()
-  }, [])
-
-  useEffect(() => {
-    const fetchStores = async () => {
-      try {
-        const response = await axios.get('https://deliveroowebapp.azurewebsites.net/api/Store')
-        setStores(response.data)  
-      } catch (error) {
-        console.error('Error fetching stores:', error)
-      }
-    }
-    fetchStores()
   }, [])
 
   return (
@@ -154,7 +140,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 paddingTop: 10
               }}
             >
-              {/* {restaurants.map((restaurant) => (
+              {restaurants.map((restaurant) => (
                 <TouchableOpacity key={restaurant.id} className='mr-4 bg-white rounded-lg shadow'>
                   <Image source={{ uri: restaurant.image }} className='h-36 w-64 rounded-t-lg' />
                   <View className='px-3 pb-4 space-y-2'>
@@ -163,19 +149,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                       <Image source={{ uri: '/placeholder.svg?height=20&width=20' }} className='h-4 w-4' />
                       <Text className='text-xs text-gray-500'>
                         <Text className='text-green-500'>{restaurant.rating}</Text> · {restaurant.category}
-                      </Text>
-                    </View>
-                  </View>
-                </TouchableOpacity> */}
-                {stores.map((store) => (
-                <TouchableOpacity key={store.id} className='mr-4 bg-white rounded-lg shadow'>
-                  <Image source={{ uri: store.imageUrl }} className='h-36 w-64 rounded-t-lg' />
-                  <View className='px-3 pb-4 space-y-2'>
-                    <Text className='text-lg font-bold pt-2'>{store.storeName}</Text>
-                    <View className='flex-row items-center space-x-1'>
-                      <Image source={{ uri: '/placeholder.svg?height=20&width=20' }} className='h-4 w-4' />
-                      <Text className='text-xs text-gray-500'>
-                        <Text className='text-green-500'>{store.rating}</Text>
                       </Text>
                     </View>
                   </View>
