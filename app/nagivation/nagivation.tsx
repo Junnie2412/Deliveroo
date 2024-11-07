@@ -14,11 +14,11 @@ import CategoriesDetailScreen from '~/screens/CategoriesDetail/CategoriesDetailS
 import SearchResultScreen from '~/screens/SearchResult/SearchResultScreen'
 import RestaurentDetailScreen from '~/screens/RestaurantDetail/RestaurentDetailScreen'
 import ProductDetailScreen from '~/screens/ProductDetail/ProductDetailScreen'
-import ChatScreen from '~/screens/Chat/ChatScreen'
 import NotificationsScreen from '~/screens/Notifications/NotificationsScreen'
 import CheckoutScreen from '~/screens/Checkout/CheckoutScreen'
 import PersonalDetailScreen from '~/screens/PersonalDetail/PersonalDetailScreen'
 import EditPersonalDetailScreen from '~/screens/PersonalDetail/EditPersonalDetailScreen'
+import ChatScreen from '~/screens/Chat/ChatScreen'
 
 
 const Stack = createNativeStackNavigator()

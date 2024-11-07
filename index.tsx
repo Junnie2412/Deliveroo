@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
-import { useCart } from './contexts/CartContext'
-import { CartProvider } from './contexts/CartContext'
+import { useCart } from './app/contexts/CartContext'
+import { CartProvider } from './app/contexts/CartContext'
 import PushNotification from 'react-native-push-notification'
 import { Platform } from 'react-native'
 import { Navigation } from 'lucide-react-native' // Assuming you use a navigation component
