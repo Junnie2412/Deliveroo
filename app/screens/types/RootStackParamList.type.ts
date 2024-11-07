@@ -10,6 +10,7 @@ export type RootStackParamList = {
   SignUp: undefined
   MyOrder: undefined
   Notifications: undefined
+  Checkout: undefined
   SearchResult: { searchQuery: string }
   RestaurantDetail: { restaurantID: string }
   ProductDetail: { product: Product }

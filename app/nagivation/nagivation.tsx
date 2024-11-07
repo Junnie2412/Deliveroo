@@ -4,7 +4,6 @@ import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import LoginScreen from '~/screens/Login/LoginScreen'
-import HomeScreen from '~/screens/Home/HomeScreen'
 import HomeTabScreen from '~/screens/HomeTab/HomeTabScreen'
 import SettingScreen from '~/screens/Setting/SettingScreen'
 import SplashScreen from '~/screens/Splash/SplashScreen'
@@ -15,8 +14,9 @@ import CategoriesDetailScreen from '~/screens/CategoriesDetail/CategoriesDetailS
 import SearchResultScreen from '~/screens/SearchResult/SearchResultScreen'
 import RestaurentDetailScreen from '~/screens/RestaurantDetail/RestaurentDetailScreen'
 import ProductDetailScreen from '~/screens/ProductDetail/ProductDetailScreen'
-import ChatScreen from '~/screens/Chat/ChatScreen'; 
+import ChatScreen from '~/screens/Chat/ChatScreen'
 import NotificationsScreen from '~/screens/Notifications/NotificationsScreen'
+import CheckoutScreen from '~/screens/Checkout/CheckoutScreen'
 
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -50,9 +50,9 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name='Chat'
-        component={ChatScreen} 
+        component={ChatScreen}
         options={{
-          tabBarIcon: ({ color, size }) => <Ionicons name='chatbubble-outline' size={size} color={color} />,  
+          tabBarIcon: ({ color, size }) => <Ionicons name='chatbubble-outline' size={size} color={color} />,
           headerShown: false
         }}
       />
@@ -82,6 +82,7 @@ const Navigation = () => {
         <Stack.Screen name='RestaurantDetail' component={RestaurentDetailScreen} options={{ headerShown: false }} />
         <Stack.Screen name='ProductDetail' component={ProductDetailScreen} options={{ headerShown: false }} />
         <Stack.Screen name='Notification' component={NotificationsScreen} options={{ headerShown: false }} />
+        <Stack.Screen name='Checkout' component={CheckoutScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   )
