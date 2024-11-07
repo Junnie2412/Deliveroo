@@ -1,6 +1,13 @@
-import React, { useState } from 'react'
-import { View, Text, Switch, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, StyleSheet } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+import { StackNavigationProp } from '@react-navigation/stack'
+import React, { useEffect, useState } from 'react'
+import { View, Text, Switch, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, StyleSheet, Alert } from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
+import { RootStackParamList } from '../types/RootStackParamList.type'
+import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Users } from '../types/User.type'
+
 
 interface SettingItemProps {
   icon: string
@@ -9,6 +16,10 @@ interface SettingItemProps {
   value?: boolean
   onPress: () => void
   hasToggle?: boolean
+}
+
+type SettingScreenProps = {
+  navigation: NativeStackNavigationProp<RootStackParamList, 'PersonalDetail'>
 }
 
 const SettingItem: React.FC<SettingItemProps> = ({ icon, title, subtitle, value, onPress, hasToggle = false }) => {
@@ -36,10 +47,10 @@ const SectionTitle: React.FC<{ title: string }> = ({ title }) => {
   return <Text style={styles.sectionTitle}>{title}</Text>
 }
 
-const SettingScreen: React.FC = () => {
+const SettingScreen: React.FC <SettingScreenProps> = ({ navigation }) => {
   const [notifications, setNotifications] = useState(true)
   const [locationServices, setLocationServices] = useState(true)
-
+  
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle='dark-content' backgroundColor='#FFFFFF' />
@@ -51,7 +62,9 @@ const SettingScreen: React.FC = () => {
               icon='person-outline'
               title='Personal Details'
               subtitle='Manage your personal information'
-              onPress={() => {}}
+              onPress={() => {
+                navigation.navigate('PersonalDetail'); 
+              }}
             />
             <SettingItem
               icon='card-outline'

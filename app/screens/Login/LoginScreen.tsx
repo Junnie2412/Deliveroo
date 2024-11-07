@@ -41,7 +41,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       })
 
       if (response.status === 200) {
-        const { accessToken, refreshToken } = response.data
+        const { accessToken, refreshToken} = response.data
         await AsyncStorage.setItem('accessToken', accessToken)
         await AsyncStorage.setItem('refreshToken', refreshToken)
         navigation.replace('Home')

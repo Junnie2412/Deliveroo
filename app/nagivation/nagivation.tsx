@@ -17,6 +17,9 @@ import ProductDetailScreen from '~/screens/ProductDetail/ProductDetailScreen'
 import ChatScreen from '~/screens/Chat/ChatScreen'
 import NotificationsScreen from '~/screens/Notifications/NotificationsScreen'
 import CheckoutScreen from '~/screens/Checkout/CheckoutScreen'
+import PersonalDetailScreen from '~/screens/PersonalDetail/PersonalDetailScreen'
+import EditPersonalDetailScreen from '~/screens/PersonalDetail/EditPersonalDetailScreen'
+
 
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -83,6 +86,8 @@ const Navigation = () => {
         <Stack.Screen name='ProductDetail' component={ProductDetailScreen} options={{ headerShown: false }} />
         <Stack.Screen name='Notification' component={NotificationsScreen} options={{ headerShown: false }} />
         <Stack.Screen name='Checkout' component={CheckoutScreen} options={{ headerShown: false }} />
+        <Stack.Screen name='PersonalDetail' component={PersonalDetailScreen} options={{ headerShown: false }} />
+        <Stack.Screen name='EditPersonalDetail' component={EditPersonalDetailScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   )
