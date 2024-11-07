@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "896439832805",
+    "project_id": "mangaapp-88fee",
+    "storage_bucket": "mangaapp-88fee.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:896439832805:android:17f239bf3a12c9289b440c",
+        "android_client_info": {
+          "package_name": "com.anonymous.Deliveroo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8FTASfnEpyDWXmTqnQmakPKU_BcEInLU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:896439832805:android:ca03d1c2374f55379b440c",
+        "android_client_info": {
+          "package_name": "com.example.mangaapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8FTASfnEpyDWXmTqnQmakPKU_BcEInLU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
