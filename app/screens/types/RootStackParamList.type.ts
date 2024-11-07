@@ -11,6 +11,7 @@ export type RootStackParamList = {
   MyOrder: undefined
   Notifications: undefined
   Checkout: undefined
+  OrderConfirmation: undefined
   SearchResult: { searchQuery: string }
   RestaurantDetail: { restaurantID: string }
   ProductDetail: { product: Product }

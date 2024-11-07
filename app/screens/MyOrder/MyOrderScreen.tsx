@@ -1,11 +1,10 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Icon from 'react-native-vector-icons/Ionicons'
-import { Orders } from '../types/Orders.type';
-
+import { Orders } from '../types/Orders.type'
 
 const OrderCard: React.FC<{ order: Orders }> = ({ order }) => (
   <TouchableOpacity style={styles.orderCard}>
@@ -13,9 +12,7 @@ const OrderCard: React.FC<{ order: Orders }> = ({ order }) => (
       <Image source={{ uri: 'https://via.placeholder.com/60' }} style={styles.restaurantImage} />
       <View style={styles.orderInfo}>
         <Text style={styles.orderDate}>{new Date(order.orderDate).toLocaleDateString()}</Text>
-        <Text style={styles.orderItems}>
-          {order.cart.cartItems.map((item) => item.productName).join(', ')}
-        </Text>
+        <Text style={styles.orderItems}>{order.cart.cartItems.map((item) => item.productName).join(', ')}</Text>
       </View>
     </View>
     <View style={styles.orderFooter}>
@@ -25,53 +22,53 @@ const OrderCard: React.FC<{ order: Orders }> = ({ order }) => (
       </Text>
     </View>
   </TouchableOpacity>
-);
+)
 
 const MyOrderScreen: React.FC = () => {
-  const [orders, setOrders] = useState<Orders[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [orders, setOrders] = useState<Orders[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
   const getAccessToken = async () => {
-    try{
+    try {
       const accessToken = await AsyncStorage.getItem('accessToken')
-      return accessToken 
-    }catch(error){
-      console.error("Error getting accessToken: ", error)
+      return accessToken
+    } catch (error) {
+      console.error('Error getting accessToken: ', error)
       return null
     }
   }
 
   useEffect(() => {
     const fetchOrders = async () => {
-      setLoading(true);
+      setLoading(true)
       try {
-        const token =  await getAccessToken()
-        if(!token){
+        const token = await getAccessToken()
+        if (!token) {
           throw new Error('Access Token not found!')
         }
         const response = await axios.get<Orders[]>('https://deliveroowebapp.azurewebsites.net/api/Orders', {
           headers: {
             Authorization: `Bearer ${token}`
           }
-        });
-        
-        setOrders(response.data);
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        Alert.alert('Error', 'Could not fetch orders.');
-      } finally {
-        setLoading(false);
-      }
-    };
+        })
 
-    fetchOrders();
-  }, []); // Empty dependency array ensures this effect only runs once when the component mounts.
+        setOrders(response.data)
+      } catch (error) {
+        console.error('Error fetching orders:', error)
+        Alert.alert('Error', 'Could not fetch orders.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchOrders()
+  }, []) // Empty dependency array ensures this effect only runs once when the component mounts.
 
   if (loading) {
-    return <Text>Loading...</Text>;
+    return <Text>Loading...</Text>
   }
 
   if (orders.length === 0) {
-    return <Text>No orders available</Text>;
+    return <Text>No orders available</Text>
   }
 
   return (
@@ -85,12 +82,12 @@ const MyOrderScreen: React.FC = () => {
         ))}
       </ScrollView>
       <TouchableOpacity style={styles.helpButton}>
-        <Icon name="help-circle-outline" size={24} color="#00CCBC" />
+        <Icon name='help-circle-outline' size={24} color='#00CCBC' />
         <Text style={styles.helpButtonText}>Need help with your order?</Text>
       </TouchableOpacity>
     </SafeAreaView>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {

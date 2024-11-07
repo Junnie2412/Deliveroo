@@ -7,6 +7,7 @@ import { RootStackParamList } from '../types/RootStackParamList.type'
 import { Store } from '../types/Store.type'
 import { Product } from '../types/Product.type'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { CartItemNew } from '../types/CartItemNew.type'
 
 const StyledView = styled(View)
 const StyledText = styled(Text)
@@ -31,7 +32,6 @@ export default function RestaurantDetailScreen() {
 
   const addToCart = useCallback(async (product: Product) => {
     try {
-      // Update local cart state
       setCart((prevCart) => {
         const existingItem = prevCart.find((item) => item.id === product.id)
         if (existingItem) {
@@ -41,7 +41,6 @@ export default function RestaurantDetailScreen() {
         }
       })
 
-      // Send the updated cart item to the API
       const token = await AsyncStorage.getItem('accessToken')
       const response = await fetch('https://deliveroowebapp.azurewebsites.net/api/Cart', {
         method: 'POST',
@@ -63,7 +62,6 @@ export default function RestaurantDetailScreen() {
         throw new Error('Failed to add product to cart')
       }
 
-      // Optionally, you could refetch the cart after adding the item
       const cartResponse = await fetch('https://deliveroowebapp.azurewebsites.net/api/Cart', {
         method: 'GET',
         headers: {
@@ -77,7 +75,7 @@ export default function RestaurantDetailScreen() {
       }
 
       const data = await cartResponse.json()
-      setCart(data[0].cartItems || []) // Update the cart with the latest data from the API
+      setCart(data[0].cartItems || [])
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message)
@@ -88,15 +86,132 @@ export default function RestaurantDetailScreen() {
     }
   }, [])
 
-  const removeFromCart = useCallback((product: Product) => {
-    setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.id === product.id)
-      if (existingItem && existingItem.quantity > 1) {
-        return prevCart.map((item) => (item.id === product.id ? { ...item, quantity: item.quantity - 1 } : item))
-      } else {
-        return prevCart.filter((item) => item.id !== product.id)
+  const removeFromCart = useCallback(async (product: Product) => {
+    try {
+      setCart((prevCart: CartItem[]) => {
+        const existingItem = prevCart.find((item) => item.id === product.id)
+        if (existingItem && existingItem.quantity > 1) {
+          return prevCart.map((item: CartItem) =>
+            item.id === product.id ? { ...item, quantity: item.quantity - 1 } : item
+          )
+        } else {
+          return prevCart.filter((item: CartItem) => item.id !== product.id)
+        }
+      })
+
+      const token = await AsyncStorage.getItem('accessToken')
+
+      if (!token) {
+        throw new Error('Authorization token is missing')
       }
-    })
+      const cartApiResponse = await fetch('https://deliveroowebapp.azurewebsites.net/api/Cart', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!cartApiResponse.ok) {
+        throw new Error('Failed to fetch cart items')
+      }
+
+      const cartData = await cartApiResponse.json()
+      const cartItems = cartData[0]?.cartItems || []
+
+      if (!cartItems.length) {
+        throw new Error('No cart items found')
+      }
+
+      const cartItem = cartItems.find((item: CartItemNew) => item.id === product.id)
+
+      if (!cartItem || cartItem.quantity === undefined) {
+        throw new Error('Product not found or quantity is missing in the cart')
+      }
+
+      console.log(product.id, cartItem.quantity - 1)
+
+      const response = await fetch('https://deliveroowebapp.azurewebsites.net/api/CartItem/quantity', {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: product.id,
+          quantity: cartItem.quantity - 1
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update product quantity in cart')
+      }
+
+      // Re-fetch the cart to update the local state with the latest backend data
+      const cartResponse = await fetch('https://deliveroowebapp.azurewebsites.net/api/Cart', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!cartResponse.ok) {
+        throw new Error('Failed to fetch updated cart')
+      }
+
+      // Set the updated cart items in the state
+      const updatedCartData = await cartResponse.json()
+      setCart(updatedCartData[0]?.cartItems || [])
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message)
+      } else {
+        setError('An unknown error occurred')
+      }
+      console.error('Error while removing from cart:', error)
+    }
+  }, [])
+
+  const clearAllCart = useCallback(async () => {
+    try {
+      const token = await AsyncStorage.getItem('accessToken')
+
+      if (!token) {
+        throw new Error('Authorization token is missing')
+      }
+      const cartApiResponse = await fetch('https://deliveroowebapp.azurewebsites.net/api/Cart', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!cartApiResponse.ok) {
+        throw new Error('Failed to fetch cart items')
+      }
+
+      const cartData = await cartApiResponse.json()
+      const cartItems = cartData[0]
+
+      const cartClearResponse = await fetch(`https://deliveroowebapp.azurewebsites.net/api/Cart/hard/${cartItems.id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!cartClearResponse.ok) {
+        throw new Error('Failed to clear cart')
+      }
+
+      setCart([])
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An unknown error occurred')
+      console.error(error)
+    }
   }, [])
 
   useEffect(() => {
@@ -144,11 +259,16 @@ export default function RestaurantDetailScreen() {
             'Content-Type': 'application/json'
           }
         })
+
         if (!response.ok) throw new Error('Failed to fetch cart')
+
         const data = await response.json()
 
-        // Assuming the API response structure is like: { cartItems: [...] }
-        setCart(data[0].cartItems || [])
+        if (Array.isArray(data) && data.length > 0) {
+          setCart(data[0].cartItems || [])
+        } else {
+          setCart([])
+        }
       } catch (error) {
         if (error instanceof Error) {
           setError(error.message)
@@ -240,8 +360,11 @@ export default function RestaurantDetailScreen() {
             )}
             keyExtractor={(item) => item.id?.toString() || item.productName}
           />
-          <StyledView className='mt-4 border-t border-gray-200 pt-4'>
+          <StyledView className='mt-4 border-t border-gray-200 pt-4 flex-row justify-between items-center'>
             <StyledText className='text-xl font-bold'>Total: ${getTotalPrice().toFixed(2)}</StyledText>
+            <StyledTouchableOpacity className='bg-red-500 py-2 px-4 rounded-full' onPress={clearAllCart}>
+              <StyledText className='text-white text-lg font-bold'>Clear All</StyledText>
+            </StyledTouchableOpacity>
           </StyledView>
           <StyledTouchableOpacity
             className='mt-6 bg-[#00CCBB] py-3 rounded-full'
