@@ -4,11 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { ChevronLeftIcon, MapPinIcon, StarIcon } from 'react-native-heroicons/solid'
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
+import { FlatList } from 'react-native-gesture-handler'
 import { RootStackParamList } from '../types/RootStackParamList.type'
 import { Store } from '../types/Store.type'
 import axios from 'axios'
 import { Categories } from '../types/Categories.type'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 
 type CategoriesDetailScreenRouteProp = RouteProp<RootStackParamList, 'CategoriesDetail'>
 
@@ -30,12 +30,15 @@ export default function CategoriesDetailScreen() {
         )
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (response.data && Array.isArray(response.data)) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const stores = response.data.map((product: any) => product.store)
-          setRestaurants(stores)
+          
+          // Sử dụng Set để loại bỏ các cửa hàng trùng lặp theo ID
+          const uniqueStores = Array.from(new Map(stores.map(store => [store.id, store])).values())
+          
+          setRestaurants(uniqueStores);
         } else {
-          console.error('Invalid data structure returned:', response.data)
-          Alert.alert('Error', 'Invalid data structure from server')
+          console.error('Invalid data structure returned:', response.data);
+          Alert.alert('Error', 'Invalid data structure from server');
         }
       } catch (error) {
         console.error('Error fetching products:', error)
@@ -65,13 +68,11 @@ export default function CategoriesDetailScreen() {
     navigation.goBack()
   }
 
-  const handleRestaurantPress = async (restaurantID: string) => {
+  const handleRestaurantPress = (restaurantID: string) => {
     navigation.navigate('RestaurantDetail', { restaurantID })
-    await AsyncStorage.setItem('restaurantID', restaurantID)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const renderRestaurant = ({ item, index }: { item: Store; index: number }) => (
+  const renderRestaurant = ({ item, index }: { item: Store, index: number }) => (
     <TouchableOpacity
       key={`${item.id}-${index}`}
       className='bg-white mb-4 shadow-sm'
@@ -86,7 +87,7 @@ export default function CategoriesDetailScreen() {
         </View>
       </View>
     </TouchableOpacity>
-  )
+  );
 
   return (
     <SafeAreaView className='flex-1 bg-white'>
@@ -131,9 +132,9 @@ export default function CategoriesDetailScreen() {
           <Text className='px-4 pt-6 mb-3 font-bold text-xl'>Featured Restaurants</Text>
           {restaurants.map((restaurant, index) => (
             <TouchableOpacity
-              key={`${restaurant.id}-${index}`}
+              key={`${restaurant.id}-${index}`}  
               className='bg-white mb-4 shadow-sm'
-              onPress={() => handleRestaurantPress(restaurant.id)}
+              onPress={() => handleRestaurantPress(restaurant.id)} 
             >
               <Image source={{ uri: restaurant.imageUrl }} className='h-36 w-full bg-gray-300 p-4' />
               <View className='px-3 pb-4 space-y-2'>
