@@ -18,5 +18,5 @@ export type RootStackParamList = {
   CategoriesDetail: { categoryID: string }
   PersonalDetail: undefined,
   EditPersonalDetail: {userID: string}
-  
+  GoogleMap: undefined
 }

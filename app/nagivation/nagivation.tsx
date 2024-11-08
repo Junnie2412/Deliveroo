@@ -21,6 +21,7 @@ import CheckoutScreen from '~/screens/Checkout/CheckoutScreen'
 import OrderConfirmationScreen from '~/screens/OrderConfirmation/OrderConfirmationScreen'
 import PersonalDetailScreen from '~/screens/PersonalDetail/PersonalDetailScreen'
 import EditPersonalDetailScreen from '~/screens/PersonalDetail/EditPersonalDetailScreen'
+import GoogleMapScreen from '~/screens/GoogleMap/GoogleMapScreen'
 
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -90,6 +91,7 @@ const Navigation = () => {
         <Stack.Screen name='OrderConfirmation' component={OrderConfirmationScreen} options={{ headerShown: false }} />
         <Stack.Screen name='PersonalDetail' component={PersonalDetailScreen} options={{ headerShown: false }} />
         <Stack.Screen name='EditPersonalDetail' component={EditPersonalDetailScreen} options={{ headerShown: false }} />
+        <Stack.Screen name='GoogleMap' component={GoogleMapScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   )
