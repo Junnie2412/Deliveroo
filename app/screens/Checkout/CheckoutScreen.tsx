@@ -8,7 +8,6 @@ import { CartItem } from '../types/CartItem.type'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { User } from '../types/User.type'
 import { RootStackParamList } from '../types/RootStackParamList.type'
-import { Order } from '../types/Order.type'
 import { Cart } from '../types/Cart.type'
 
 const StyledView = styled(View)
@@ -108,26 +107,31 @@ const CheckoutScreen = () => {
     try {
       const restaurantID = await AsyncStorage.getItem('restaurantID')
 
-      const orderData: Order = {
-        CartID: cart?.id || '',
-        StoreLocationID: restaurantID || '',
-        PaymentMethod: 'PayPal',
-        BillingAddress: userAddress
+      const orderData = {
+        cartID: cart?.id || '',
+        storeLocationID: restaurantID || '',
+        paymentMethod: 'PayPal',
+        billingAddress: userAddress || ''
       }
 
-      console.log(cart?.id)
-      console.log(userAddress)
       console.log(userID)
-      console.log(restaurantID)
 
       const token = await AsyncStorage.getItem('accessToken')
       if (token) {
-        const response = await axios.post('https://deliveroowebapp.azurewebsites.net/api/orders', orderData, {
+        const response = await fetch('https://deliveroowebapp.azurewebsites.net/api/Orders', {
+          method: 'POST',
           headers: {
-            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
-          }
+          },
+          body: JSON.stringify({
+            cartID: cart?.id || '',
+            storeLocationID: restaurantID || '',
+            paymentMethod: 'PayPal',
+            billingAddress: userAddress || ''
+          })
         })
+
+        console.log(orderData)
 
         if (response.status === 500) {
           Alert.alert('Success', 'Your order has been placed!')
