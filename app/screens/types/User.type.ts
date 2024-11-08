@@ -1,9 +1,11 @@
-export type Users = {
-    id: string;
-    userName: string;
-    fullName: string;
-    email: string;
-    imageUrl: string;
-    phoneNumber: string;
-    address: string;
-};
+
+export type User = {
+  id: string
+  fullName: string
+  address: string
+  imageUrl: string
+  email: string
+  userName: string
+  phoneNumber: string
+  isActive: boolean
+}
