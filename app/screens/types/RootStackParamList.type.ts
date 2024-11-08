@@ -16,4 +16,7 @@ export type RootStackParamList = {
   RestaurantDetail: { restaurantID: string }
   ProductDetail: { product: Product }
   CategoriesDetail: { categoryID: string }
+  PersonalDetail: undefined,
+  EditPersonalDetail: {userID: string}
+  
 }
