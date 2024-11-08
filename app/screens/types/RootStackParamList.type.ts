@@ -18,5 +18,10 @@ export type RootStackParamList = {
   CategoriesDetail: { categoryID: string }
   PersonalDetail: undefined,
   EditPersonalDetail: {userID: string}
+<<<<<<< Updated upstream
   GoogleMap: undefined
+=======
+  //Chat: { userName: string };
+  Chat: undefined
+>>>>>>> Stashed changes
 }

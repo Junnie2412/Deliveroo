@@ -8,6 +8,9 @@ import { Store } from '../types/Store.type'
 import { Product } from '../types/Product.type'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { CartItemNew } from '../types/CartItemNew.type'
+import axios from 'axios'
+
+type RestaurantDetailScreenRouteProp = RouteProp<RootStackParamList, 'RestaurantDetail'>
 
 const StyledView = styled(View)
 const StyledText = styled(Text)
@@ -29,6 +32,10 @@ export default function RestaurantDetailScreen() {
   const [error, setError] = useState<string | null>(null)
   const [cart, setCart] = useState<CartItem[]>([])
   const [isCartModalVisible, setIsCartModalVisible] = useState(false)
+
+  const handleChatPress = () => {
+    navigation.navigate('Chat')
+  }
 
   const addToCart = useCallback(async (product: Product) => {
     try {
@@ -422,6 +429,9 @@ export default function RestaurantDetailScreen() {
           <Star size={16} color='gold' />
           <StyledText className='ml-1 text-sm text-gray-500'>4.5</StyledText>
         </StyledView>
+        <StyledTouchableOpacity onPress={handleChatPress}>
+          <ShoppingBag size={30} />
+        </StyledTouchableOpacity>
       </StyledView>
 
       <FlatList

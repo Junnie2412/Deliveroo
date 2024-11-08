@@ -30,15 +30,15 @@ const TabNavigator = () => {
   return (
     <Tab.Navigator>
       <Tab.Screen
-        name='Home'
-        component={HomeScreen}
+        name='Home Tab'
+        component={HomeTabScreen}
         options={{
           tabBarIcon: ({ color, size }) => <Ionicons name='home-outline' size={size} color={color} />,
           headerShown: false
         }}
       />
       <Tab.Screen
-        name='MyOrder'
+        name='My Order'
         component={MyOrderScreen}
         options={{
           tabBarIcon: ({ color, size }) => <Ionicons name='file-tray-outline' size={size} color={color} />,
