@@ -95,13 +95,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <Text className='font-bold text-gray-400 text-xs'>Deliver Now!</Text>
             <Text className='font-bold text-xl'>Current Location</Text>
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('GoogleMap')}>
             <Image
               source={{
                 uri: 'https://firebasestorage.googleapis.com/v0/b/deliveroo-dab94.appspot.com/o/Splash%2Flocation.png?alt=media&token=e617b26b-a9ed-421e-a6dc-4674b59c8360'
               }}
               className='h-10 w-10 rounded-full'
-            />
+            />         
           </TouchableOpacity>
         </View>
 

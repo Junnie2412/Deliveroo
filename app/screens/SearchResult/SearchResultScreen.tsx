@@ -149,15 +149,15 @@ export default function SearchResultScreen() {
               maximumValue={100}
               step={5}
               value={priceRange}
-              onValueChange={setPriceRange}
+              onSlidingComplete={(value) => setPriceRange(value)}
               minimumTrackTintColor='#00CCBB'
               maximumTrackTintColor='#d4d4d4'
               thumbTintColor='#00CCBB'
             />
             <StyledView className='flex-row justify-between mt-1'>
-              <StyledText className='text-gray-500'>$0</StyledText>
+              <StyledText className='text-gray-500 font-bold'>$0</StyledText>
               <StyledText className='text-gray-500'>${priceRange}</StyledText>
-              <StyledText className='text-gray-500'>$100</StyledText>
+              <StyledText className='text-gray-500 font-bold'>$100</StyledText>
             </StyledView>
           </StyledView>
 

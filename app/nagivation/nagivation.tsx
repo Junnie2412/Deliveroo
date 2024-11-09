@@ -21,6 +21,7 @@ import CheckoutScreen from '~/screens/Checkout/CheckoutScreen'
 import OrderConfirmationScreen from '~/screens/OrderConfirmation/OrderConfirmationScreen'
 import PersonalDetailScreen from '~/screens/PersonalDetail/PersonalDetailScreen'
 import EditPersonalDetailScreen from '~/screens/PersonalDetail/EditPersonalDetailScreen'
+import GoogleMapScreen from '~/screens/GoogleMap/GoogleMapScreen'
 
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -29,15 +30,15 @@ const TabNavigator = () => {
   return (
     <Tab.Navigator>
       <Tab.Screen
-        name='Home'
-        component={HomeScreen}
+        name='Home Tab'
+        component={HomeTabScreen}
         options={{
           tabBarIcon: ({ color, size }) => <Ionicons name='home-outline' size={size} color={color} />,
           headerShown: false
         }}
       />
       <Tab.Screen
-        name='MyOrder'
+        name='My Order'
         component={MyOrderScreen}
         options={{
           tabBarIcon: ({ color, size }) => <Ionicons name='file-tray-outline' size={size} color={color} />,
@@ -90,6 +91,7 @@ const Navigation = () => {
         <Stack.Screen name='OrderConfirmation' component={OrderConfirmationScreen} options={{ headerShown: false }} />
         <Stack.Screen name='PersonalDetail' component={PersonalDetailScreen} options={{ headerShown: false }} />
         <Stack.Screen name='EditPersonalDetail' component={EditPersonalDetailScreen} options={{ headerShown: false }} />
+        <Stack.Screen name='GoogleMap' component={GoogleMapScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   )

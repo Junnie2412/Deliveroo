@@ -12,4 +12,9 @@ export type Orders = {
       price: number
     }>
   }
+  storeLocation: {
+    latitude: number,
+    longitude: number,
+    storeName: string
+  }
 }
