@@ -1,5 +1,16 @@
 import React, { useState } from 'react'
-import { View, Text, Switch, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, StyleSheet } from 'react-native'
+import {
+  View,
+  Text,
+  Switch,
+  ScrollView,
+  TouchableOpacity,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Alert
+} from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { RootStackParamList } from '../types/RootStackParamList.type'
 import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types'
@@ -46,6 +57,18 @@ const SettingScreen: React.FC<SettingScreenProps> = ({ navigation }) => {
   const [notifications, setNotifications] = useState(true)
   const [locationServices, setLocationServices] = useState(true)
 
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('accessToken')
+      await AsyncStorage.removeItem('refreshToken')
+      Alert.alert('Logged Out', 'You have successfully logged out.')
+      navigation.replace('Login') // Replace 'Login' with your actual login screen name
+    } catch (error) {
+      Alert.alert('Logout Error', 'An error occurred while logging out.')
+      console.error('Error during logout:', error)
+    }
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle='dark-content' backgroundColor='#FFFFFF' />
@@ -57,9 +80,7 @@ const SettingScreen: React.FC<SettingScreenProps> = ({ navigation }) => {
               icon='person-outline'
               title='Personal Details'
               subtitle='Manage your personal information'
-              onPress={() => {
-                navigation.navigate('PersonalDetail')
-              }}
+              onPress={() => navigation.navigate('PersonalDetail')}
             />
             <SettingItem
               icon='card-outline'
@@ -134,7 +155,7 @@ const SettingScreen: React.FC<SettingScreenProps> = ({ navigation }) => {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.logoutButton}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutButtonText}>Log Out</Text>
         </TouchableOpacity>
       </ScrollView>

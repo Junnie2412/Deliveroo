@@ -1,10 +1,10 @@
 import { initializeApp } from 'firebase/app'
 import { getStorage } from 'firebase/storage'
 import { getFirestore } from 'firebase/firestore'
-import { getDatabase } from 'firebase/database';
+import { getDatabase } from 'firebase/database'
 import Config from 'react-native-config'
 
-console.log("Config Variables:", Config);
+console.log('Config Variables:', Config)
 
 const firebaseConfig = {
   apiKey: Config.FIREBASE_API_KEY,
@@ -20,4 +20,4 @@ const app = initializeApp(firebaseConfig)
 
 export const storage = getStorage(app)
 export const db = getFirestore(app)
-export const realTimeDB = getDatabase(app); 
+export const realTimeDB = getDatabase(app)

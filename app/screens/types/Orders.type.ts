@@ -13,8 +13,8 @@ export type Orders = {
     }>
   }
   storeLocation: {
-    latitude: number,
-    longitude: number,
+    latitude: number
+    longitude: number
     storeName: string
   }
 }
