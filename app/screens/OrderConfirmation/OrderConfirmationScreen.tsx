@@ -7,18 +7,68 @@ import axios from 'axios'
 import { CartItem } from '../types/CartItem.type'
 import { NavigationProp, useNavigation } from '@react-navigation/native'
 import { RootStackParamList } from '../types/RootStackParamList.type'
+import { Cart } from '../types/Cart.type'
 
 export default function OrderConfirmationScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList, 'OrderConfirmation'>>()
   const [user, setUser] = useState<User>()
   const [orderItems, setOrderItems] = useState<CartItem[]>([])
+  const [cart, setCart] = useState<Cart | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [error, setError] = useState<string | null>(null)
+
+  const navigateToMyOrder = async () => {
+    const token = await AsyncStorage.getItem('accessToken')
+    await fetch(`https://deliveroowebapp.azurewebsites.net/api/Cart/${cart?.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    })
+    navigation.navigate('MyOrder')
+  }
+
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const token = await AsyncStorage.getItem('accessToken')
+        const response = await fetch('https://deliveroowebapp.azurewebsites.net/api/Cart/active', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+
+        if (!response.ok) throw new Error('Failed to fetch cart')
+
+        const data = await response.json()
+
+        if (Array.isArray(data) && data.length > 0) {
+          setCart(data[0] || [])
+        } else {
+          setCart(null)
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          setError(error.message)
+        } else {
+          setError('An unknown error occurred')
+        }
+        console.error(error)
+      }
+    }
+
+    fetchCart()
+  }, [])
 
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
         const token = await AsyncStorage.getItem('accessToken')
         if (token) {
-          const response = await axios.get('https://deliveroowebapp.azurewebsites.net/api/Cart', {
+          const response = await axios.get('https://deliveroowebapp.azurewebsites.net/api/Cart/active', {
             headers: {
               Authorization: `Bearer ${token}`
             }
@@ -99,7 +149,7 @@ export default function OrderConfirmationScreen() {
         </TouchableOpacity>
 
         {/* Return Button */}
-        <TouchableOpacity style={[styles.button, styles.returnButton]} onPress={() => navigation.navigate('MyOrder')}>
+        <TouchableOpacity style={[styles.button, styles.returnButton]} onPress={navigateToMyOrder}>
           <Text style={styles.buttonText}>Return</Text>
         </TouchableOpacity>
       </ScrollView>

@@ -7,7 +7,6 @@ import Navigation from './nagivation/nagivation'
 const App = () => {
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null)
 
-  // Request permission and get push notification token
   const requestPushNotificationPermission = async () => {
     const { status } = await Notifications.requestPermissionsAsync()
     if (status !== 'granted') {
@@ -17,14 +16,13 @@ const App = () => {
 
     try {
       const token = await Notifications.getExpoPushTokenAsync()
-      setExpoPushToken(token.data) // Store token for sending push notifications
+      setExpoPushToken(token.data)
       console.log('Expo Push Token:', token.data)
     } catch (error) {
       console.error('Error getting push notification token:', error)
     }
   }
 
-  // Send push notification with badge count
   const sendPushNotification = async (expoPushToken: string) => {
     const message = {
       to: expoPushToken,
@@ -32,7 +30,7 @@ const App = () => {
       title: 'Cart Update',
       body: 'You have 5 items in your cart!',
       data: { cartCount: 5 },
-      badge: 5 // Badge will update on app icon
+      badge: 5
     }
 
     await fetch('https://exp.host/--/api/v2/push/send', {
@@ -48,7 +46,6 @@ const App = () => {
   useEffect(() => {
     requestPushNotificationPermission()
 
-    // Add listeners for receiving notifications and responding to them
     Notifications.addNotificationReceivedListener((notification) => {
       console.log('Notification received:', notification)
     })
@@ -57,12 +54,11 @@ const App = () => {
       console.log('Notification response received:', response)
     })
 
-    // Send push notification once the token is received
     if (expoPushToken) {
       sendPushNotification(expoPushToken)
       console.log(expoPushToken)
     }
-  }, [expoPushToken]) // Dependency array ensures this runs when expoPushToken changes
+  }, [expoPushToken])
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

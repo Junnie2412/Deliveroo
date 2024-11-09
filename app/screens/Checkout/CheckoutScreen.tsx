@@ -31,7 +31,7 @@ const CheckoutScreen = () => {
       try {
         const token = await AsyncStorage.getItem('accessToken')
         if (token) {
-          const response = await axios.get('https://deliveroowebapp.azurewebsites.net/api/Cart', {
+          const response = await axios.get('https://deliveroowebapp.azurewebsites.net/api/Cart/active', {
             headers: {
               Authorization: `Bearer ${token}`
             }
@@ -73,7 +73,7 @@ const CheckoutScreen = () => {
     const fetchCart = async () => {
       try {
         const token = await AsyncStorage.getItem('accessToken')
-        const response = await fetch('https://deliveroowebapp.azurewebsites.net/api/Cart', {
+        const response = await fetch('https://deliveroowebapp.azurewebsites.net/api/Cart/active', {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -107,34 +107,43 @@ const CheckoutScreen = () => {
     try {
       const restaurantID = await AsyncStorage.getItem('restaurantID')
 
-      const orderData = {
-        cartID: cart?.id || '',
-        storeLocationID: restaurantID || '',
-        paymentMethod: 'PayPal',
-        billingAddress: userAddress || ''
-      }
-
       console.log(userID)
+      console.log(restaurantID)
 
       const token = await AsyncStorage.getItem('accessToken')
       if (token) {
+        const responseStoreLocation = await fetch(
+          `https://deliveroowebapp.azurewebsites.net/api/store-locations/${restaurantID}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            }
+          }
+        )
+
+        const storeLocationIDResponse = await responseStoreLocation.json()
+
+        console.log(cart?.id || '')
+        console.log(storeLocationIDResponse.id || '')
+        console.log(userAddress || '')
+
         const response = await fetch('https://deliveroowebapp.azurewebsites.net/api/Orders', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
           },
           body: JSON.stringify({
             cartID: cart?.id || '',
-            storeLocationID: restaurantID || '',
-            paymentMethod: 'PayPal',
+            storeLocationID: storeLocationIDResponse.id || '',
+            paymentMethod: 'PayOs',
             billingAddress: userAddress || ''
           })
         })
 
-        console.log(orderData)
-
-        if (response.status === 500) {
-          Alert.alert('Success', 'Your order has been placed!')
+        if (response.status === 200) {
           navigation2.navigate('OrderConfirmation')
         } else {
           Alert.alert('Error', 'Failed to place the order.')

@@ -4,4 +4,5 @@ export type CartItemNew = {
   productName: string
   quantity: number
   price: number
+  storeID: string
 }

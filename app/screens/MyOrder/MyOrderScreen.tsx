@@ -1,118 +1,184 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import React, { useEffect, useState } from 'react'
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import Icon from 'react-native-vector-icons/Ionicons'
-import { Orders } from '../types/Orders.type';
+import React, { useState, useEffect, useCallback } from 'react'
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { MapPin, Clock, CreditCard, Package } from 'lucide-react-native'
+import { OrderList } from '../types/OrderList.type'
 
+const API_URL = 'https://deliveroowebapp.azurewebsites.net/api/Orders'
 
-const OrderCard: React.FC<{ order: Orders }> = ({ order }) => (
-  <TouchableOpacity style={styles.orderCard}>
-    <View style={styles.orderHeader}>
-      <Image source={{ uri: 'https://via.placeholder.com/60' }} style={styles.restaurantImage} />
-      <View style={styles.orderInfo}>    
-        <Text style={styles.orderDate}>{new Date(order.orderDate).toLocaleDateString()}</Text>
-        <Text style={styles.orderItems}>
-          {order.cart.cartItems.map((item) => item.productName).join(', ')}
-        </Text>
-      </View>
-    </View>
-    <View style={styles.orderFooter}>
-      <Text style={styles.orderTotal}>${order.cart.totalPrice}</Text>
-      <Text style={[styles.orderStatus, order.orderStatus === 'Delivered' && styles.statusDelivered]}>
-        {order.orderStatus}
-      </Text>
-    </View>
-  </TouchableOpacity>
-);
+const fetchOrders = async (): Promise<OrderList[]> => {
+  try {
+    const token = await AsyncStorage.getItem('accessToken')
+    if (!token) throw new Error('No access token found')
 
-const MyOrderScreen: React.FC = () => {
-  const [orders, setOrders] = useState<Orders[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const getAccessToken = async () => {
-    try{
-      const accessToken = await AsyncStorage.getItem('accessToken')
-      return accessToken 
-    }catch(error){
-      console.error("Error getting accessToken: ", error)
-      return null
+    const response = await fetch(API_URL, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    if (!response.ok) throw new Error('Network response was not ok')
+
+    const data = await response.json()
+    return data
+  } catch (error) {
+    console.error('Failed to fetch orders:', error)
+    throw error
+  }
+}
+
+function formatDate(dateString: string): string {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffTime = Math.abs(now.getTime() - date.getTime())
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7) return `${diffDays} days ago`
+  return date.toLocaleDateString()
+}
+
+export default function MyOrdersScreen() {
+  const [orders, setOrders] = useState<OrderList[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [error, setError] = useState<string | null>(null)
+
+  const loadOrders = useCallback(async () => {
+    try {
+      const fetchedOrders = await fetchOrders()
+      setOrders(fetchedOrders)
+      setError(null)
+    } catch (err) {
+      console.error('Error loading orders:', err) // Log the error
+      setError('Failed to load orders. Please try again.')
+    } finally {
+      setIsLoading(false)
+      setIsRefreshing(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadOrders()
+  }, [loadOrders])
+
+  const onRefresh = useCallback(() => {
+    setIsRefreshing(true)
+    loadOrders()
+  }, [loadOrders])
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'delivered':
+        return styles.statusDelivered
+      case 'processing':
+        return styles.statusProcessing
+      case 'pending':
+        return styles.statusPending
+      default:
+        return styles.statusDefault
     }
   }
-  useEffect(() => {
-    const fetchOrders = async () => {
-      setLoading(true);
-      try {
-        const token =  await getAccessToken()
-        if(!token){
-          throw new Error('Access Token not found!')
-        }
-        const response = await axios.get<Orders[]>('https://deliveroowebapp.azurewebsites.net/api/Orders', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        
-        setOrders(response.data);
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        Alert.alert('Error', 'Could not fetch orders.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchOrders();
-  }, []); // Empty dependency array ensures this effect only runs once when the component mounts.
-  if (loading) {
-    return <Text>Loading...</Text>;
-  }
-  if (orders.length === 0) {
-    return <Text>No orders available</Text>;
+
+  const renderOrderItem = ({ item: order }: { item: OrderList }) => (
+    <View style={styles.orderCard}>
+      <View style={styles.orderHeader}>
+        <Text style={styles.orderNumber}>Order #{order.id}</Text>
+        <View style={[styles.statusBadge, getStatusColor(order.orderStatus)]}>
+          <Text style={styles.statusText}>{order.orderStatus}</Text>
+        </View>
+      </View>
+      <View style={styles.orderContent}>
+        <View style={styles.orderDetails}>
+          <Text style={styles.sectionTitle}>Order Details</Text>
+          <View style={styles.detailRow}>
+            <Clock style={styles.icon} />
+            <Text style={styles.detailText}>{formatDate(order.orderDate)}</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <MapPin style={styles.icon} />
+            <Text style={styles.detailText}>{order.storeLocation.address}</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <CreditCard style={styles.icon} />
+            <Text style={styles.detailText}>{order.paymentMethod}</Text>
+          </View>
+        </View>
+        <View style={styles.orderItems}>
+          <Text style={styles.sectionTitle}>Items</Text>
+          {order.cart.cartItems.map((item) => (
+            <View key={item.id} style={styles.itemRow}>
+              <Text style={styles.itemText}>
+                {item.quantity}x {item.productName}
+              </Text>
+              <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
+            </View>
+          ))}
+          <Text style={styles.totalPrice}>Total: ${order.cart.totalPrice.toFixed(2)}</Text>
+        </View>
+      </View>
+      <View style={styles.actionButtons}>
+        <TouchableOpacity style={styles.trackButton}>
+          <Package style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>Track Order</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.reorderButton}>
+          <Text style={styles.reorderButtonText}>Reorder</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  )
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size='large' color='#00CCBB' />
+      </View>
+    )
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Orders</Text>
-      </View>
-      <ScrollView style={styles.ordersContainer}>
-        {orders.map((order) => (
-          <OrderCard key={order.id} order={order} />
-        ))}
-      </ScrollView>
-      <TouchableOpacity style={styles.helpButton}>
-        <Icon name="help-circle-outline" size={24} color="#00CCBC" />
-        <Text style={styles.helpButtonText}>Need help with your order?</Text>
-      </TouchableOpacity>
-    </SafeAreaView>
-  );
-};
+    <FlatList
+      style={styles.container}
+      data={orders}
+      renderItem={renderOrderItem}
+      keyExtractor={(item) => item.id}
+      ListHeaderComponent={<Text style={styles.title}>My Orders</Text>}
+      refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} colors={['#00CCBB']} />}
+      ListEmptyComponent={
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No orders found</Text>
+        </View>
+      }
+    />
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8f8'
+    backgroundColor: '#f3f4f6'
   },
-  header: {
-    backgroundColor: '#ffffff',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0'
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
-  headerTitle: {
+  title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333333'
-  },
-  ordersContainer: {
-    flex: 1,
-    padding: 16
+    marginVertical: 16,
+    marginHorizontal: 16
   },
   orderCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 16,
+    marginHorizontal: 16,
     marginBottom: 16,
+    borderRadius: 8,
+    backgroundColor: 'white',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -121,76 +187,118 @@ const styles = StyleSheet.create({
   },
   orderHeader: {
     flexDirection: 'row',
-    marginBottom: 12
-  },
-  restaurantImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 12
-  },
-  orderInfo: {
-    flex: 1
-  },
-  restaurantName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333333',
-    marginBottom: 4
-  },
-  orderDate: {
-    fontSize: 14,
-    color: '#666666',
-    marginBottom: 4
-  },
-  orderItems: {
-    fontSize: 14,
-    color: '#666666'
-  },
-  orderFooter: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 12
+    padding: 16,
+    backgroundColor: '#f9fafb',
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8
   },
-  orderTotal: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333333'
+  orderNumber: {
+    fontSize: 18,
+    fontWeight: '600'
   },
-  orderStatus: {
-    fontSize: 14,
-    fontWeight: 'bold',
+  statusBadge: {
     paddingVertical: 4,
     paddingHorizontal: 8,
-    borderRadius: 4
+    borderRadius: 9999
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '500'
   },
   statusDelivered: {
-    backgroundColor: '#e6f7ed',
-    color: '#00a86b'
+    backgroundColor: '#10b981'
   },
-  statusInProgress: {
-    backgroundColor: '#fff7e6',
-    color: '#ffa500'
+  statusProcessing: {
+    backgroundColor: '#fbbf24'
   },
-  statusCancelled: {
-    backgroundColor: '#ffe6e6',
-    color: '#ff0000'
+  statusPending: {
+    backgroundColor: '#ef4444'
   },
-  helpButton: {
+  statusDefault: {
+    backgroundColor: '#6b7280'
+  },
+  orderContent: {
+    padding: 16
+  },
+  orderDetails: {
+    marginBottom: 16
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8
+  },
+  detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-    backgroundColor: '#ffffff',
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0'
+    marginBottom: 4
   },
-  helpButtonText: {
-    marginLeft: 8,
+  icon: {
+    marginRight: 8
+  },
+  detailText: {
+    fontSize: 14
+  },
+  orderItems: {},
+  itemRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4
+  },
+  itemText: {
+    fontSize: 14
+  },
+  itemPrice: {
+    fontSize: 14
+  },
+  totalPrice: {
     fontSize: 16,
-    color: '#00CCBC',
-    fontWeight: '600'
+    fontWeight: '600',
+    textAlign: 'right',
+    marginTop: 8
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    padding: 16
+  },
+  trackButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 6
+  },
+  buttonIcon: {
+    marginRight: 4
+  },
+  buttonText: {
+    fontSize: 14
+  },
+  reorderButton: {
+    backgroundColor: '#00CCBB',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6
+  },
+  reorderButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '500'
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 32
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#6b7280'
   }
 })
-export default MyOrderScreen
