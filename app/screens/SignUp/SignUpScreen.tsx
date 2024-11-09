@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { View, Text, TextInput, TouchableOpacity, Animated, Alert } from 'react-native'
 import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types'
 import { RootStackParamList } from '../types/RootStackParamList.type'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 type SignUpScreenScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>
@@ -85,6 +86,10 @@ const SignUpScreen: React.FC<SignUpScreenScreenProps> = ({ navigation }) => {
       })
 
       if (response.ok) {
+        const { accessToken, refreshToken } = await response.json()
+
+        await AsyncStorage.setItem('accessToken', accessToken)
+        await AsyncStorage.setItem('refreshToken', refreshToken)
         Alert.alert('Success', 'You have successfully signed up!')
         navigation.replace('Home')
       } else {

@@ -16,12 +16,10 @@ export type RootStackParamList = {
   RestaurantDetail: { restaurantID: string }
   ProductDetail: { product: Product }
   CategoriesDetail: { categoryID: string }
-  PersonalDetail: undefined,
-  EditPersonalDetail: {userID: string}
-<<<<<<< Updated upstream
+  PersonalDetail: undefined
+  EditPersonalDetail: { userID: string }
+
   GoogleMap: undefined
-=======
-  //Chat: { userName: string };
+
   Chat: undefined
->>>>>>> Stashed changes
 }
